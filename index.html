@@ -189,7 +189,9 @@
   .scalekey .k.hi b{color:var(--gold-deep)}
 
   /* ---------- shared stage ---------- */
-  .stage{padding:30px 0 0}
+  /* scrollStage() aligns to the top of the stage, which the sticky brand bar would otherwise
+     cover — including the step heading that now receives focus on every page change. */
+  .stage{padding:30px 0 0;scroll-margin-top:84px}
 
   /* ---------- wizard body ---------- */
   #wizardBody,#resultsBody{max-width:940px;margin:0 auto}
@@ -206,9 +208,10 @@
     font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:var(--gold-deep);
   }
   /* Focus lands here after each page change so keyboard and screen reader users are moved to
-     the new questions instead of being stranded on the Continue button. */
-  .step-label:focus{outline:none}
-  .step-label:focus-visible{outline:2px solid var(--gold-deep);outline-offset:5px;border-radius:3px}
+     the new questions instead of being stranded on the Continue button. No ring: the heading
+     isn't in the tab order, so nothing is lost visually, and Chrome matches :focus-visible on
+     programmatic focus even after a mouse click — which just looked like a stray box. */
+  .step-label:focus,.step-label:focus-visible{outline:none}
   .navnote{text-align:center;font-size:13px;color:var(--muted);margin:12px 0 0;min-height:1.2em}
 
   .q{padding:22px 0;border-bottom:1px solid var(--line-soft)}
