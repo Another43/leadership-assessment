@@ -13,8 +13,9 @@
   var SCALE = 5;       // points on the rating scale
   var MAX_COUNT = 5;   // largest number the "statements left" message ever shows
 
-  /* Every key the interface reads.
-     html:   this value may contain <b>/<strong>/<em>/<i>; every other value is plain text
+  /* Every key the interface reads. Every value is plain text — no markup anywhere, so a
+     translator never has to preserve a tag. Where the design needs emphasis, the page builds
+     it (see footerTitle, which renders bold ahead of footer1).
      list:   this value is an array of exactly N strings
      plural: this value is an object of plural forms, not a string
      vars:   placeholders that must survive translation                              */
@@ -22,7 +23,7 @@
     heroEyebrow:    {},
     heroTitle:      {},
     heroLede:       {},
-    legend:         { html: true },
+    legend:         {},
     scaleKey:       { list: SCALE },
     begin:          {},
     reveal:         {},
@@ -31,7 +32,8 @@
     resultsTitle:   {},
     print:          {},
     reset:          {},
-    footer1:        { html: true },
+    footerTitle:    {},
+    footer1:        {},
     footer2:        {},
     langLabel:      {},
     partOf:         { vars: ["n", "total"] },
@@ -41,8 +43,6 @@
     growthLabel:    {},
     langChoose:     {}
   };
-
-  var ALLOWED_TAGS = ["b", "strong", "em", "i"];
 
   /* Which plural forms this language actually needs *for this tool*.
      Arabic's CLDR table has six categories, but the only number shown here is how many
@@ -72,25 +72,15 @@
     return out;
   }
 
-  function htmlIssues(where, s, allowed) {
-    var out = [], re = /<\s*\/?\s*([a-zA-Z][a-zA-Z0-9]*)[^>]*>/g, m, open = [];
-    while ((m = re.exec(s))) {
-      var tag = m[1].toLowerCase(), closing = /^<\s*\//.test(m[0]);
-      if (!allowed) {
-        // One complaint per value, not one per angle bracket.
-        out.push({ level: "error", where: where, msg: "This value must be plain text, but contains <" + tag + ">." });
-        break;
-      }
-      if (ALLOWED_TAGS.indexOf(tag) === -1) {
-        out.push({ level: "error", where: where, msg: "<" + tag + "> is not allowed here. Use only: " + ALLOWED_TAGS.join(", ") + "." });
-        continue;
-      }
-      if (closing) {
-        if (open.pop() !== tag) out.push({ level: "error", where: where, msg: "Closing </" + tag + "> does not match the tag it should close." });
-      } else open.push(tag);
-    }
-    if (open.length) out.push({ level: "error", where: where, msg: "Tag <" + open[open.length - 1] + "> is never closed." });
-    return out;
+  /* No value anywhere may contain markup. One complaint per value, not one per angle bracket. */
+  function tagIssues(where, s) {
+    var m = /<\s*\/?\s*([a-zA-Z][a-zA-Z0-9]*)[^>]*>/.exec(s);
+    if (!m) return [];
+    return [{
+      level: "error", where: where,
+      msg: "Contains <" + m[1].toLowerCase() + ">. Every line here is plain text — remove the tags and " +
+           "keep the words. If a line needs bold, that is set by the page, not the translation."
+    }];
   }
 
   function varIssues(where, s, vars) {
@@ -136,7 +126,7 @@
           if (v.length !== spec.list) err(where, "Has " + v.length + " labels; it needs exactly " + spec.list + ".");
           v.forEach(function (s, i) {
             if (!isStr(s)) return err(where + "[" + i + "]", "Empty.");
-            out = out.concat(textIssues(where + "[" + i + "]", s), htmlIssues(where + "[" + i + "]", s, false));
+            out = out.concat(textIssues(where + "[" + i + "]", s), tagIssues(where + "[" + i + "]", s));
           });
           return;
         }
@@ -149,7 +139,7 @@
             if (!isStr(form)) return err(where + "." + cat, "Missing. This language uses this form for: " + ns.join(", ") + ".");
             if (ns.length > 1 && form.indexOf("{n}") === -1)
               err(where + "." + cat, "Used for " + ns.join(", ") + ", so it must include {n} or the number is lost.");
-            out = out.concat(textIssues(where + "." + cat, form), htmlIssues(where + "." + cat, form, false));
+            out = out.concat(textIssues(where + "." + cat, form), tagIssues(where + "." + cat, form));
           });
           Object.keys(v).forEach(function (cat) {
             if (!need[cat]) warn(where + "." + cat, "Not needed for this language; it will never be shown. Harmless.");
@@ -158,7 +148,7 @@
         }
 
         if (!isStr(v)) return err(where, "Missing or empty.");
-        out = out.concat(textIssues(where, v), htmlIssues(where, v, !!spec.html), varIssues(where, v, spec.vars));
+        out = out.concat(textIssues(where, v), tagIssues(where, v), varIssues(where, v, spec.vars));
       });
 
       Object.keys(loc.ui).forEach(function (k) {
@@ -175,13 +165,13 @@
         if (!d || typeof d !== "object") return err(where, "Not an object.");
         ["title", "desc"].forEach(function (k) {
           if (!isStr(d[k])) return err(where + "." + k, "Missing or empty.");
-          out = out.concat(textIssues(where + "." + k, d[k]), htmlIssues(where + "." + k, d[k], false));
+          out = out.concat(textIssues(where + "." + k, d[k]), tagIssues(where + "." + k, d[k]));
         });
         if (!Array.isArray(d.items)) return err(where + ".items", "Missing. Must be a list of " + PER + " statements.");
         if (d.items.length !== PER) err(where + ".items", "Has " + d.items.length + " statements; it needs exactly " + PER + ", in the same order as the English file.");
         d.items.forEach(function (s, j) {
           if (!isStr(s)) return err(where + ".items[" + j + "]", "Empty.");
-          out = out.concat(textIssues(where + ".items[" + j + "]", s), htmlIssues(where + ".items[" + j + "]", s, false));
+          out = out.concat(textIssues(where + ".items[" + j + "]", s), tagIssues(where + ".items[" + j + "]", s));
         });
       });
     }
@@ -191,7 +181,7 @@
 
   return {
     DIMS: DIMS, PER: PER, SCALE: SCALE, MAX_COUNT: MAX_COUNT,
-    UI_KEYS: UI, ALLOWED_TAGS: ALLOWED_TAGS,
+    UI_KEYS: UI,
     requiredPlurals: requiredPlurals,
     validate: validate
   };

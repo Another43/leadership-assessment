@@ -6,7 +6,7 @@
     "heroEyebrow": "Inspirational Leadership",
     "heroTitle": "How do you lead?",
     "heroLede": "A self-assessment across the six dimensions of leaders who inspire.",
-    "legend": "Rate yourself <b>1 to 5</b> on each statement, answering honestly about how you lead today rather than how you hope to. A <b>5</b> means you strongly agree, a <b>3</b> is neutral, and a <b>1</b> means you strongly disagree.",
+    "legend": "Rate yourself 1 to 5 on each statement, answering honestly about how you lead today rather than how you hope to. A 5 means you strongly agree, a 3 is neutral, and a 1 means you strongly disagree.",
     "scaleKey": [
       "Strongly disagree",
       "Disagree",
@@ -24,7 +24,8 @@
     "resultsTitle": "Six dimensions of inspirational leadership",
     "print": "Print or save as PDF",
     "reset": "Start over",
-    "footer1": "<b>Inspirational Leadership Self-Assessment.</b> A reflective tool for leaders who want to grow. Scores describe tendencies, not verdicts, and the pattern across the six matters more than any single number.",
+    "footerTitle": "Inspirational Leadership Self-Assessment.",
+    "footer1": "A reflective tool for leaders who want to grow. Scores describe tendencies, not verdicts, and the pattern across the six matters more than any single number.",
     "footer2": "Provided by Global Leadership Partners, a non-profit equipping leaders of character to make a positive difference. Replace this line and the mark above with the official logo and footer when you publish.",
     "langLabel": "Language",
     "partOf": "Part {n} of {total}",

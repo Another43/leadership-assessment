@@ -6,7 +6,7 @@
     "heroEyebrow": "Liderazgo que inspira",
     "heroTitle": "¿Cómo lideras?",
     "heroLede": "Una autoevaluación en las seis dimensiones de los líderes que inspiran.",
-    "legend": "Puntúate del <b>1 al 5</b> en cada afirmación, respondiendo con honestidad sobre cómo lideras hoy y no sobre cómo te gustaría liderar. Un <b>5</b> significa que estás muy de acuerdo, un <b>3</b> es neutral y un <b>1</b> significa que estás muy en desacuerdo.",
+    "legend": "Puntúate del 1 al 5 en cada afirmación, respondiendo con honestidad sobre cómo lideras hoy y no sobre cómo te gustaría liderar. Un 5 significa que estás muy de acuerdo, un 3 es neutral y un 1 significa que estás muy en desacuerdo.",
     "scaleKey": [
       "Muy en desacuerdo",
       "En desacuerdo",
@@ -24,7 +24,8 @@
     "resultsTitle": "Seis dimensiones del liderazgo que inspira",
     "print": "Imprimir o guardar como PDF",
     "reset": "Empezar de nuevo",
-    "footer1": "<b>Autoevaluación de Liderazgo que Inspira.</b> Una herramienta de reflexión para líderes que quieren crecer. Las puntuaciones describen tendencias, no veredictos, y el conjunto de las seis dice más que cualquier número aislado.",
+    "footerTitle": "Autoevaluación de Liderazgo que Inspira.",
+    "footer1": "Una herramienta de reflexión para líderes que quieren crecer. Las puntuaciones describen tendencias, no veredictos, y el conjunto de las seis dice más que cualquier número aislado.",
     "footer2": "Ofrecida por Global Leadership Partners, una organización sin ánimo de lucro que forma líderes de carácter para marcar una diferencia positiva. Sustituye esta línea y el logotipo de arriba por los oficiales al publicar.",
     "langLabel": "Idioma",
     "partOf": "Parte {n} de {total}",

@@ -474,7 +474,6 @@ const prefersReduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const $=(id)=>document.getElementById(id);
 function setText(id,v){ const el=$(id); if(el) el.textContent=v; }
-function setHTML(id,v){ const el=$(id); if(el) el.innerHTML=v; }
 
 /* fraction display, LTR-isolated so it reads correctly in RTL */
 function frac(n,d){ return '<span dir="ltr">'+nf(n)+'<span class="den">/'+nf(d)+'</span></span>'; }
@@ -570,12 +569,16 @@ function renderIntro(){
   setText("heroEyebrow", ui("heroEyebrow"));
   setText("heroTitle",   ui("heroTitle"));
   setText("heroLede",    ui("heroLede"));
-  setHTML("legendText",  ui("legend"));
+  setText("legendText",  ui("legend"));
   const key=ui("scaleKey"), cls=["lo","","","","hi"];
   $("scaleKey").innerHTML=key.map((label,i)=>'<div class="k '+cls[i]+'"><b>'+nf(i+1)+'</b>'+((i===0||i===2||i===4)?esc(label):'')+'</div>').join("");
   $("beginBtn").innerHTML=esc(ui("begin"))+ARROW.down;
-  setHTML("footer1", ui("footer1"));
-  setHTML("footer2", ui("footer2"));
+  // The assessment's name leads the footer in bold. Built as nodes rather than markup so no
+  // locale file ever needs a tag in it — see locales/README.md.
+  const f1=$("footer1"); f1.textContent="";
+  const name=document.createElement("b"); name.textContent=ui("footerTitle");
+  f1.append(name, " "+ui("footer1"));
+  setText("footer2", ui("footer2"));
   $("lang").setAttribute("aria-label", ui("langLabel"));
 }
 function goIntro(){ phase="intro"; showScreen("intro"); scrollTop(); }

@@ -50,8 +50,9 @@ Three rules that matter:
 2. **Keep anything in curly braces exactly as it is.** `{n}` and `{total}` are replaced by
    numbers. `Part {n} of {total}` becomes "Part 3 of 6". You may move them within the sentence,
    but do not translate or delete them.
-3. **Only two lines may contain formatting:** `legend` and `footer1` accept `<b>`, `<strong>`,
-   `<em>` and `<i>`. Everywhere else, plain text only.
+3. **Every value is plain text.** There is no markup to preserve anywhere in these files. If a
+   line appears bold or italic in the assessment, the page decides that — `footerTitle` is the
+   name of the assessment and always renders bold, for instance. Just translate the words.
 
 ### Plural forms
 
@@ -121,6 +122,10 @@ reach fall back to English entirely. It must hold exactly six, each with exactly
 
 **The statements do not match the dimension they are under.** The dimensions are in a different
 order from `en.json`. Scores are matched by position, so put them back in the original order.
+
+**I fixed the file but the checker still reports the old problem.** Your browser is holding an
+old copy of the page. Hard-refresh it: Cmd-Shift-R on a Mac, Ctrl-Shift-R on Windows. The
+language files themselves are always re-read, so the assessment picks those up immediately.
 
 ---
 
