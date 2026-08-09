@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="sl-theme-light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inspirational Leadership — Self-Assessment | Global Leadership Partners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,18..72,400;0,18..72,500;1,18..72,400&family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Shoelace: theme + the components this app uses -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css">
+<script type="module">
+  const SL = "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/";
+  await Promise.all([
+    "components/button/button.js",
+    "components/select/select.js",
+    "components/option/option.js",
+    "components/radio-group/radio-group.js",
+    "components/radio-button/radio-button.js",
+    "components/card/card.js",
+    "components/tag/tag.js",
+    "components/progress-bar/progress-bar.js"
+  ].map(p => import(SL + p)));
+  document.documentElement.classList.add("sl-ready");
+</script>
+
+<style>
+  /* ============================================================
+     GLOBAL LEADERSHIP PARTNERS — brand tokens
+     Swap these six hex values for the official brand palette.
+     ============================================================ */
+  :root{
+    --navy:#16263F;     /* brand anchor: headings, structure, hero card */
+    --brand-blue:#1A3C6B;/* GLP header blue (matches their site bar)     */
+    --royal:#25548A;    /* primary interactive blue: selections, bars    */
+    --gold-brand:#F0C415;/* true GLP gold (logo, header rule) on dark    */
+    --gold:#C99A3A;     /* contrast-safe gold for fills on light (wedges)*/
+    --gold-deep:#856518;/* gold for text on light backgrounds (AA-safe) */
+    --ground:#F2F5FA;   /* page background: cool paper                  */
+    --surface:#FFFFFF;  /* cards                                        */
+
+    --ink:#1A2433;
+    --muted:#566273;
+    --line:#DCE3EE;
+    --line-soft:#EAEFF6;
+
+    --serif:"Newsreader","Iowan Old Style","Palatino Linotype",Georgia,serif;
+    --sans:"Libre Franklin",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+
+    --maxw:1200px;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(22,38,63,.04), 0 12px 30px -18px rgba(22,38,63,.22);
+
+    /* ---- Shoelace, re-themed to the brand ---- */
+    --sl-font-sans:var(--sans);
+    --sl-color-primary-50:#eef3f9;
+    --sl-color-primary-100:#d6e1ef;
+    --sl-color-primary-200:#b0c5dd;
+    --sl-color-primary-300:#84a4c8;
+    --sl-color-primary-400:#5681b0;
+    --sl-color-primary-500:#356391;
+    --sl-color-primary-600:#25548A;  /* royal — main */
+    --sl-color-primary-700:#1f456f;
+    --sl-color-primary-800:#1b3a5c;
+    --sl-color-primary-900:#16263F;  /* navy */
+    --sl-color-primary-950:#0f1c30;
+    --sl-border-radius-small:8px;
+    --sl-border-radius-medium:11px;
+    --sl-border-radius-large:14px;
+    --sl-focus-ring-color:rgba(201,154,58,.45);
+    --sl-focus-ring-width:3px;
+    --sl-input-font-size-medium:16px;
+  }
+
+  /* Per-script font swap. A locale sets <body data-script="…">. */
+  body[data-script="arabic"]{
+    --serif:"Amiri","Noto Naskh Arabic","Times New Roman",serif;
+    --sans:"Noto Sans Arabic","Tajawal",system-ui,sans-serif;
+  }
+
+  /* Hide Shoelace elements until their definitions load (no FOUC) */
+  sl-radio-group:not(:defined),
+  sl-radio-button:not(:defined),
+  sl-button:not(:defined),
+  sl-select:not(:defined),
+  sl-tag:not(:defined),
+  sl-card:not(:defined){visibility:hidden}
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--ground);color:var(--ink);
+    font-family:var(--sans);font-weight:400;line-height:1.55;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  ::selection{background:rgba(201,154,58,.28)}
+
+  /* ---------- sticky brand bar ---------- */
+  .brandbar{position:sticky;top:0;z-index:50;background:var(--brand-blue);color:#fff;border-bottom:2.5px solid var(--gold-brand)}
+  .brandbar-inner{max-width:var(--maxw);margin:0 auto;padding:12px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .wordmark{display:flex;align-items:center;gap:10px;min-width:0}
+  .glp-logo{height:42px;width:auto;display:block;flex:none}
+
+  .langpick{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.85)}
+  .langpick svg{flex:none;opacity:.8}
+  sl-select.lang{width:auto;min-width:148px}
+  sl-select.lang::part(combobox){
+    background-color:transparent;color:#fff;
+    border-color:rgba(255,255,255,.28);border-radius:8px;
+  }
+  sl-select.lang::part(display-input){color:#fff;font-size:12.5px}
+  sl-select.lang::part(expand-icon){color:rgba(255,255,255,.8)}
+
+  /* ---------- layout / screens ---------- */
+  main{max-width:var(--maxw);margin:0 auto;padding:0 22px 96px}
+  .screen{display:none}
+  .screen.active{display:block}
+
+  /* ---------- intro ---------- */
+  .hero{padding:60px 0 8px}
+  .hero-aside{margin-top:6px}
+  @media(min-width:900px){
+    .hero{display:grid;grid-template-columns:1.1fr .9fr;column-gap:56px;grid-template-areas:"copy aside" "cta aside";align-items:start;padding:80px 0 44px}
+    .hero-copy{grid-area:copy}
+    .hero-copy .lede{margin-bottom:0}
+    .hero-aside{grid-area:aside;align-self:center;margin-top:0}
+    .hero-aside .legend{margin-bottom:0}
+    .hero-cta{grid-area:cta;margin-top:24px}
+  }
+  .eyebrow{font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;font-weight:600;color:var(--gold-deep);margin:0 0 18px}
+  .hero h1{font-family:var(--serif);font-weight:400;color:var(--navy);font-size:clamp(40px,8vw,68px);line-height:1.02;letter-spacing:-.015em;margin:0 0 14px}
+  .hero .lede{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:clamp(18px,2.6vw,22px);line-height:1.4;margin:0 0 30px;max-width:34ch}
+  .legend{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);margin-bottom:30px}
+  .legend p{margin:0 0 16px;font-size:14.5px;color:var(--ink)}
+  .legend p b{color:var(--navy)}
+  .scalekey{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .scalekey .k{flex:1;text-align:center;padding:9px 6px;font-size:11px;color:var(--muted);border-inline-end:1px solid var(--line-soft);background:#fff}
+  .scalekey .k:last-child{border-inline-end:0}
+  .scalekey .k b{display:block;font-size:15px;color:var(--navy);font-weight:600;margin-bottom:2px;font-variant-numeric:tabular-nums}
+  .scalekey .k.lo b{color:var(--royal)}
+  .scalekey .k.hi b{color:var(--gold-deep)}
+
+  /* ---------- shared stage ---------- */
+  .stage{padding:30px 0 0}
+
+  /* ---------- wizard body ---------- */
+  #wizardBody,#resultsBody{max-width:940px;margin:0 auto}
+  .wizhead{text-align:center;margin:2px 0 18px}
+  sl-progress-bar#prog{--height:6px;--track-color:var(--line-soft);--indicator-color:var(--royal);display:block;max-width:520px;margin:0 auto 14px;border-radius:4px}
+  .nav-restart{text-align:center;margin-top:16px}
+  #restartBtn::part(base){color:var(--muted)}
+  #screen-language .lang-land{max-width:560px;margin:0 auto;padding:clamp(48px,10vh,96px) 0 60px;text-align:center}
+  .lang-prompt{font-family:var(--serif);font-weight:400;color:var(--navy);font-size:clamp(24px,4vw,34px);margin:0 0 30px}
+  .lang-choices{display:flex;flex-direction:column;gap:12px;max-width:340px;margin:0 auto}
+  .lang-btn::part(base){width:100%;justify-content:center}
+  .step-label{font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:var(--gold-deep)}
+
+  .q{padding:22px 0;border-bottom:1px solid var(--line-soft)}
+  .q:last-of-type{border-bottom:0}
+  .q-text{display:block;font-size:16px;color:var(--ink);line-height:1.45;margin-bottom:2px}
+  .q-text .q-n{color:var(--muted);font-variant-numeric:tabular-nums;font-weight:600;margin-inline-end:8px}
+
+  sl-radio-group.scalegrp{width:100%}
+  sl-radio-group.scalegrp::part(form-control-label){margin-bottom:14px}
+  sl-radio-group.scalegrp::part(button-group){width:100%}
+  sl-radio-group.scalegrp::part(button-group__base){display:flex;gap:8px}
+  .scalegrp sl-radio-button{flex:1 1 0}
+  .scalegrp sl-radio-button::part(button){
+    width:100%;border-radius:11px;border-width:1.5px;
+    font-variant-numeric:tabular-nums;font-weight:600;
+    padding-top:14px;padding-bottom:14px;
+  }
+  .scalegrp sl-radio-button::part(label){padding:0}
+  .scale-ends{display:grid;grid-template-columns:1fr 1fr 1fr;font-size:11.5px;color:var(--muted);margin-top:9px;padding:0 2px}
+  .scale-ends span:first-child{text-align:start}
+  .scale-ends .mid{text-align:center}
+  .scale-ends span:last-child{text-align:end}
+
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:30px 0 0}
+  .nav .spacer{flex:1}
+
+  /* ---------- results body ---------- */
+  .results-head{text-align:center;padding:6px 0 2px;margin-top:30px}
+  .results-head .eyebrow{color:var(--gold-deep)}
+  .results-head h2{font-family:var(--serif);font-weight:400;color:var(--navy);font-size:clamp(28px,5.4vw,42px);margin:0;letter-spacing:-.01em}
+
+  .breakdown{display:grid;gap:2px;margin:14px 0 4px}
+  .brk{display:grid;grid-template-columns:1fr auto;align-items:center;gap:14px;padding:14px 4px;border-bottom:1px solid var(--line-soft)}
+  .brk:last-child{border-bottom:0}
+  .brk-main{min-width:0}
+  .brk-name{font-family:var(--serif);font-size:18px;color:var(--navy);font-weight:500;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  sl-tag.tag::part(base){border:0;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:2px 9px}
+  sl-tag.s-strength::part(base){background:rgba(201,154,58,.16);color:var(--gold-deep)}
+  sl-tag.s-solid::part(base){background:rgba(37,84,138,.12);color:var(--royal)}
+  sl-tag.s-developing::part(base){background:var(--line-soft);color:var(--muted)}
+  sl-tag.s-growth::part(base){background:var(--line-soft);color:var(--muted)}
+  .brk-bar{height:6px;background:var(--line-soft);border-radius:4px;overflow:hidden;margin-top:10px}
+  .brk-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--royal),#3a6fae);border-radius:4px;width:0;transition:width .9s cubic-bezier(.22,1,.36,1)}
+  .brk-val{font-family:var(--serif);font-size:24px;color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .brk-val .den{color:var(--muted);font-size:15px}
+
+
+  .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+
+  footer{max-width:var(--maxw);margin:0 auto;padding:34px 22px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;line-height:1.6}
+  footer p{max-width:78ch;margin:0 0 10px}
+  footer b{color:var(--navy)}
+
+  /* ---------- RTL ---------- */
+  [dir="rtl"] .eyebrow,[dir="rtl"] .step-label,
+  [dir="rtl"] .hero h1,[dir="rtl"] .results-head h2,
+  [dir="rtl"] .brk-val,[dir="rtl"] .brk-name .n{letter-spacing:normal}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:560px){
+    .scalegrp sl-radio-button::part(button){padding-top:12px;padding-bottom:12px}
+    .scalegrp sl-radio-group::part(button-group__base){gap:6px}
+    .glp-logo{height:34px}
+    .hero{padding:44px 0 6px}
+  }
+  @media (max-width:400px){ .glp-logo{height:30px} }
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *{transition:none !important}
+  }
+
+  /* ---------- print ---------- */
+  @media print{
+    .brandbar,.wizhead,.nav,.nav-restart,.actions,#screen-intro,#screen-language{display:none !important}
+    body{background:#fff}
+  }
+</style>
+</head>
+<body data-script="latin">
+
+<header class="brandbar">
+  <div class="brandbar-inner">
+    <div class="wordmark" aria-label="Global Leadership Partners">
+      <img class="glp-logo" src="data:image/png;base64,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" alt="Global Leadership Partners">
+    </div>
+    <div class="langpick">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/>
+      </svg>
+      <sl-select class="lang" id="lang" size="small" hoist></sl-select>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- LANGUAGE LANDING -->
+  <section class="screen active" id="screen-language">
+    <div class="lang-land">
+      <p class="lang-prompt" id="langPrompt"></p>
+      <div class="lang-choices" id="langChoices"></div>
+    </div>
+  </section>
+
+  <!-- INTRO -->
+  <section class="screen" id="screen-intro">
+    <div class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow" id="heroEyebrow"></p>
+        <h1 id="heroTitle"></h1>
+        <p class="lede" id="heroLede"></p>
+      </div>
+      <div class="hero-aside">
+        <div class="legend">
+          <p id="legendText"></p>
+          <div class="scalekey" id="scaleKey" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="hero-cta">
+        <sl-button variant="primary" size="large" id="beginBtn"></sl-button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAGE: wizard + results -->
+  <section class="screen" id="screen-stage">
+    <div class="stage" id="stage">
+
+      <!-- WIZARD BODY -->
+      <div id="wizardBody">
+        <div class="wizhead">
+          <sl-progress-bar id="prog" value="0"></sl-progress-bar>
+          <span class="step-label" id="stepLabel"></span>
+        </div>
+        <div id="statements"></div>
+        <div class="nav">
+          <sl-button id="backBtn" variant="default"></sl-button>
+          <span class="spacer"></span>
+          <sl-button id="nextBtn" variant="primary"></sl-button>
+        </div>
+        <div class="nav-restart">
+          <sl-button id="restartBtn" variant="text" size="small"></sl-button>
+        </div>
+      </div>
+
+      <!-- RESULTS BODY -->
+      <div id="resultsBody" style="display:none">
+        <div class="results-head">
+          <p class="eyebrow" id="resultsEyebrow"></p>
+          <h2 id="resultsTitle"></h2>
+        </div>
+        <div class="breakdown" id="breakdown"></div>
+        <div class="actions">
+          <sl-button id="printBtn" variant="default"></sl-button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p id="footer1"></p>
+  <p id="footer2"></p>
+</footer>
+
+<script>
+const LOCALES = {
+
+  en:{
+    label:"English", dir:"ltr", script:"latin", numLocale:"en-US",
+    ui:{
+      countOf:"<b>{n}</b> of {total}",
+      heroEyebrow:"Inspirational Leadership",
+      heroTitle:"How do you lead?",
+      heroLede:"A self-assessment across the six dimensions of leaders who inspire.",
+      legend:'Rate yourself <b>1 to 5</b> on each statement, answering honestly about how you lead today rather than how you hope to. A <b>5</b> means you strongly agree, a <b>3</b> is neutral, and a <b>1</b> means you strongly disagree.',
+      scaleKey:["Strongly disagree","Disagree","Neutral","Agree","Strongly agree"],
+      begin:"Begin the assessment",
+      dimScore:"Dimension score",
+      reveal:"Reveal my leadership profile",
+      lockedAll:"Answer all {total} statements to see your profile.",
+      remaining:{one:"{n} statement left.",other:"{n} statements left."},
+      goNext:"Go to the next unanswered",
+      ready:"All set. See how your six dimensions come together.",
+      resultsEyebrow:"Your profile",
+      resultsTitle:"Six dimensions of inspirational leadership",
+      tags:{strength:"Signature strength",solid:"Solid",developing:"Developing",growth:"Growth area"},
+      strongest:"Strongest dimension",
+      growthOpp:"Biggest growth opportunity",
+      overall:"Overall",
+      bands:{
+        hi:"Your responses point to <b>deeply inspirational</b> tendencies across the board. The work now is consistency: keep your lowest dimension as honest as your highest.",
+        mid:"You have a <b>strong inspirational foundation</b>. Sharpening your one or two lowest dimensions will likely have the biggest effect on the people you lead.",
+        low:"Your leadership is <b>emerging</b>. Rather than improve everywhere at once, choose a single dimension below and make it deliberate for the next quarter.",
+        base:"You are <b>early in the journey</b>, which is the best time to be intentional. Pick the one dimension that matters most for your current role and start there."
+      },
+      print:"Print or save as PDF",
+      reset:"Start over",
+      footer1:'<b>Inspirational Leadership Self-Assessment.</b> A reflective tool for leaders who want to grow. Scores describe tendencies, not verdicts, and the most useful number is often your lowest one.',
+      footer2:"Provided by Global Leadership Partners, a non-profit equipping leaders of character to make a positive difference. Replace this line and the mark above with the official logo and footer when you publish.",
+      langLabel:"Language"
+    },
+    dimensions:[
+      {title:"Dream Big", desc:"Vision, and the courage to imagine what could be.", items:[
+        "I regularly generate ideas that challenge conventional thinking.",
+        "I am willing to take calculated risks to achieve meaningful goals.",
+        "Others would describe me as more bold than cautious.",
+        "When facing problems, I naturally envision what could be possible.",
+        "I focus more on long-term vision than short-term details."]},
+      {title:"Explain Why", desc:"Purpose that connects the head and the heart.", items:[
+        "I am driven by a desire to make a meaningful difference.",
+        "I emphasize intrinsic motivation (purpose, growth) over external rewards.",
+        "I clearly explain not just what we do, but why it matters.",
+        "I communicate purpose in ways that engage both the head and the heart.",
+        "I am energized by contributing to causes bigger than myself."]},
+      {title:"Build Hope", desc:"Confidence, example, and reasons to believe.", items:[
+        "I lead by example and do not ask others to do what I would not do.",
+        "I consistently communicate confidence that our vision is achievable.",
+        "Others experience me as positive and encouraging.",
+        "I demonstrate character and values that earn trust and respect.",
+        "I intentionally recognize and celebrate progress and success."]},
+      {title:"Show Care", desc:"Attention, presence, and putting others first.", items:[
+        "I listen attentively and seek to fully understand others.",
+        "I take a genuine interest in the lives of those I lead.",
+        "People can count on me during difficult or stressful times.",
+        "I create meaningful and memorable moments for others.",
+        "I prioritize the needs of others and the team over my own."]},
+      {title:"Place Trust", desc:"Belief in others, and the freedom to deliver.", items:[
+        "I assume positive intent in others' actions.",
+        "I avoid unnecessary perfectionism that limits others.",
+        "I trust others to perform at a high level.",
+        "I treat mistakes as opportunities for learning and growth.",
+        "I delegate outcomes clearly and allow flexibility in how work is done."]},
+      {title:"Use Strengths", desc:"Knowing, and growing, what people do best.", items:[
+        "I actively seek to understand others' strengths and interests.",
+        "I build relationships that help me know people's strengths deeply.",
+        "I coach others to develop and apply their strengths.",
+        "I regularly align my own work with my strengths.",
+        "I intentionally build teams with diverse and complementary strengths."]}
+    ]
+  },
+
+  es:{
+    label:"Español", dir:"ltr", script:"latin", numLocale:"es-ES",
+    ui:{
+      countOf:"<b>{n}</b> de {total}",
+      heroEyebrow:"Liderazgo que inspira",
+      heroTitle:"¿Cómo lideras?",
+      heroLede:"Una autoevaluación en las seis dimensiones de los líderes que inspiran.",
+      legend:'Puntúate del <b>1 al 5</b> en cada afirmación, respondiendo con honestidad sobre cómo lideras hoy y no sobre cómo te gustaría liderar. Un <b>5</b> significa que estás muy de acuerdo, un <b>3</b> es neutral y un <b>1</b> significa que estás muy en desacuerdo.',
+      scaleKey:["Muy en desacuerdo","En desacuerdo","Neutral","De acuerdo","Muy de acuerdo"],
+      begin:"Comenzar la autoevaluación",
+      dimScore:"Puntuación de la dimensión",
+      reveal:"Ver mi perfil de liderazgo",
+      lockedAll:"Responde las {total} afirmaciones para ver tu perfil.",
+      remaining:{one:"Queda {n} afirmación.",other:"Quedan {n} afirmaciones."},
+      goNext:"Ir a la siguiente sin responder",
+      ready:"Listo. Observa cómo se integran tus seis dimensiones.",
+      resultsEyebrow:"Tu perfil",
+      resultsTitle:"Seis dimensiones del liderazgo que inspira",
+      tags:{strength:"Fortaleza distintiva",solid:"Sólida",developing:"En desarrollo",growth:"Área de mejora"},
+      strongest:"Dimensión más fuerte",
+      growthOpp:"Mayor área de mejora",
+      overall:"Total",
+      bands:{
+        hi:"Tus respuestas reflejan una marcada <b>capacidad de inspirar</b> en todas las dimensiones. El reto ahora es la constancia: mantén tu dimensión más baja tan honesta como la más alta.",
+        mid:"Tienes una <b>base sólida para inspirar</b>. Reforzar una o dos de tus dimensiones más bajas será, probablemente, lo que más impacto tenga en quienes lideras.",
+        low:"Tu liderazgo está <b>en desarrollo</b>. En lugar de mejorar en todo a la vez, elige una sola dimensión de abajo y trabájala de forma deliberada durante el próximo trimestre.",
+        base:"Estás <b>al comienzo del camino</b>, que es el mejor momento para ser intencional. Elige la dimensión más importante para tu rol actual y empieza por ahí."
+      },
+      print:"Imprimir o guardar como PDF",
+      reset:"Empezar de nuevo",
+      footer1:'<b>Autoevaluación de Liderazgo que Inspira.</b> Una herramienta de reflexión para líderes que quieren crecer. Las puntuaciones describen tendencias, no veredictos, y el número más útil suele ser el más bajo.',
+      footer2:"Ofrecida por Global Leadership Partners, una organización sin ánimo de lucro que forma líderes de carácter para marcar una diferencia positiva. Sustituye esta línea y el logotipo de arriba por los oficiales al publicar.",
+      langLabel:"Idioma"
+    },
+    dimensions:[
+      {title:"Sueña en grande", desc:"Visión y el valor de imaginar lo que podría ser.", items:[
+        "Genero con frecuencia ideas que desafían el pensamiento convencional.",
+        "Estoy dispuesto a asumir riesgos calculados para lograr metas significativas.",
+        "Los demás me describirían como más audaz que cauteloso.",
+        "Ante los problemas, imagino de forma natural lo que podría ser posible.",
+        "Me centro más en la visión a largo plazo que en los detalles inmediatos."]},
+      {title:"Explica el porqué", desc:"Un propósito que conecta la mente y el corazón.", items:[
+        "Me impulsa el deseo de marcar una diferencia significativa.",
+        "Doy más importancia a la motivación interna (propósito, crecimiento) que a las recompensas externas.",
+        "Explico con claridad no solo lo que hacemos, sino por qué importa.",
+        "Comunico el propósito de maneras que conectan con la mente y con el corazón.",
+        "Me llena de energía contribuir a causas más grandes que yo."]},
+      {title:"Construye esperanza", desc:"Confianza, ejemplo y motivos para creer.", items:[
+        "Predico con el ejemplo y no pido a los demás que hagan lo que yo no haría.",
+        "Comunico de forma constante la confianza en que nuestra visión es alcanzable.",
+        "Los demás me perciben como una persona positiva y alentadora.",
+        "Demuestro un carácter y unos valores que inspiran confianza y respeto.",
+        "Reconozco y celebro de forma intencionada el progreso y los logros."]},
+      {title:"Cuida a las personas", desc:"Atención, presencia y anteponer a los demás.", items:[
+        "Escucho con atención y busco comprender plenamente a los demás.",
+        "Me intereso de forma genuina por la vida de quienes lidero.",
+        "Las personas pueden contar conmigo en momentos difíciles o de tensión.",
+        "Creo momentos significativos y memorables para los demás.",
+        "Antepongo las necesidades de los demás y del equipo a las mías."]},
+      {title:"Confía en los demás", desc:"Creer en los demás y darles libertad para lograrlo.", items:[
+        "Asumo una intención positiva en las acciones de los demás.",
+        "Evito el perfeccionismo innecesario que limita a los demás.",
+        "Confío en que los demás pueden rendir a un alto nivel.",
+        "Trato los errores como oportunidades de aprendizaje y crecimiento.",
+        "Delego resultados con claridad y doy flexibilidad en la forma de hacer el trabajo."]},
+      {title:"Aprovecha las fortalezas", desc:"Conocer, y desarrollar, lo que cada persona hace mejor.", items:[
+        "Busco activamente comprender las fortalezas e intereses de los demás.",
+        "Cultivo relaciones que me permiten conocer a fondo las fortalezas de las personas.",
+        "Acompaño a los demás para que desarrollen y apliquen sus fortalezas.",
+        "Alineo con regularidad mi propio trabajo con mis fortalezas.",
+        "Formo equipos de forma intencionada con fortalezas diversas y complementarias."]}
+    ]
+  },
+
+  ar:{
+    label:"العربية", dir:"rtl", script:"arabic", numLocale:"ar", numbering:"latn",
+    ui:{
+      countOf:"<b>{n}</b> من {total}",
+      heroEyebrow:"القيادة المُلهِمة",
+      heroTitle:"كيف تقود؟",
+      heroLede:"تقييم ذاتي عبر الأبعاد الستة للقادة المُلهِمين.",
+      legend:'قيّم نفسك من <b>1 إلى 5</b> في كل عبارة، مجيبًا بصدق عن أسلوبك في القيادة اليوم لا عمّا تتمنّاه. الدرجة <b>5</b> تعني أنك موافق بشدة، و<b>3</b> محايد، و<b>1</b> تعني أنك غير موافق بشدة.',
+      scaleKey:["غير موافق بشدة","غير موافق","محايد","موافق","موافق بشدة"],
+      begin:"ابدأ التقييم",
+      dimScore:"درجة البُعد",
+      reveal:"أظهِر ملف قيادتي",
+      lockedAll:"أجب عن العبارات الـ {total} لرؤية ملفك.",
+      remaining:{
+        zero:"لم تتبقَّ عبارات.",
+        one:"تبقّت عبارة واحدة.",
+        two:"تبقّت عبارتان.",
+        few:"تبقّت {n} عباراتٍ.",
+        many:"تبقّت {n} عبارةً.",
+        other:"تبقّت {n} عبارة."
+      },
+      goNext:"انتقل إلى العبارة التالية غير المُجابة",
+      ready:"اكتمل التقييم. شاهد كيف تتكامل أبعادك الستة.",
+      resultsEyebrow:"ملفك",
+      resultsTitle:"الأبعاد الستة للقيادة المُلهِمة",
+      tags:{strength:"قوة مميِّزة",solid:"متينة",developing:"قيد التطوّر",growth:"مجال للتحسين"},
+      strongest:"أقوى بُعد",
+      growthOpp:"أكبر مجال للتحسين",
+      overall:"الإجمالي",
+      bands:{
+        hi:"تشير إجاباتك إلى ميلٍ راسخ نحو <b>القيادة المُلهِمة</b> في جميع الأبعاد. المهمة الآن هي الاتساق: اجعل أضعف أبعادك صادقًا كأقواها.",
+        mid:"لديك <b>أساس متين للإلهام</b>. غالبًا ما يكون تحسين بُعدٍ أو بُعدين من أدنى أبعادك هو الأكثر تأثيرًا في من تقودهم.",
+        low:"قيادتك <b>قيد النمو</b>. بدل التحسّن في كل شيء دفعة واحدة، اختر بُعدًا واحدًا أدناه واعمل عليه بقصدٍ خلال الربع المقبل.",
+        base:"أنت <b>في بداية الطريق</b>، وهو أفضل وقتٍ للعمل بقصد. اختر البُعد الأهم لدورك الحالي وابدأ منه."
+      },
+      print:"اطبع أو احفظ بصيغة PDF",
+      reset:"ابدأ من جديد",
+      footer1:'<b>تقييم ذاتي للقيادة المُلهِمة.</b> أداة تأمّلية للقادة الراغبين في النمو. تصف الدرجات ميولًا لا أحكامًا، وغالبًا ما يكون الرقم الأكثر فائدة هو الأدنى.',
+      footer2:"مقدَّم من Global Leadership Partners، وهي منظمة غير ربحية تُعِدّ قادةً ذوي أخلاق لإحداث فرقٍ إيجابي. استبدل هذا السطر والشعار أعلاه بالنسخ الرسمية عند النشر.",
+      langLabel:"اللغة"
+    },
+    dimensions:[
+      {title:"احلم بطموح", desc:"الرؤية والجرأة على تخيّل ما يمكن أن يكون.", items:[
+        "أطرح بانتظام أفكارًا تتحدى التفكير السائد.",
+        "أنا مستعد لخوض مخاطر محسوبة لتحقيق أهداف ذات معنى.",
+        "يصفني الآخرون بأنني جريء أكثر مني حذِر.",
+        "عند مواجهة المشكلات، أتخيّل تلقائيًا ما يمكن أن يكون.",
+        "أركّز على الرؤية بعيدة المدى أكثر من التفاصيل الآنية."]},
+      {title:"اشرح الغاية", desc:"غايةٌ تصل بين العقل والقلب.", items:[
+        "تدفعني رغبةٌ في إحداث فرقٍ حقيقي.",
+        "أُغلّب الدافع الداخلي (الغاية والنمو) على المكافآت الخارجية.",
+        "أشرح بوضوح ليس فقط ما نقوم به، بل لماذا يهم.",
+        "أنقل الغاية بأسلوب يخاطب العقل والقلب معًا.",
+        "يمنحني الإسهام في قضايا أكبر من ذاتي طاقةً."]},
+      {title:"ابْنِ الأمل", desc:"الثقة والقدوة وأسبابٌ للإيمان بالرؤية.", items:[
+        "أقود بالقدوة، ولا أطلب من غيري ما لا أقوم به بنفسي.",
+        "أُعبّر باستمرار عن ثقتي بأن رؤيتنا قابلة للتحقيق.",
+        "يراني الآخرون شخصًا إيجابيًا ومُشجِّعًا.",
+        "أُجسّد قيمًا وأخلاقًا تكسب الثقة والاحترام.",
+        "أحرص عن قصد على الاعتراف بالتقدّم والاحتفاء بالنجاح."]},
+      {title:"اهتمّ بالناس", desc:"الإصغاء والحضور وتقديم الآخرين.", items:[
+        "أُصغي باهتمام وأسعى لفهم الآخرين فهمًا كاملًا.",
+        "أهتم اهتمامًا صادقًا بحياة من أقودهم.",
+        "يمكن للناس الاعتماد عليّ في الأوقات الصعبة والمُجهِدة.",
+        "أصنع للآخرين لحظات ذات معنى تبقى في الذاكرة.",
+        "أُقدّم احتياجات الآخرين والفريق على احتياجاتي."]},
+      {title:"امنح الثقة", desc:"الإيمان بالآخرين ومنحهم حرية الإنجاز.", items:[
+        "أفترض حُسن النية في تصرّفات الآخرين.",
+        "أتجنّب الكمالية المُفرِطة التي تُقيّد الآخرين.",
+        "أثق بقدرة الآخرين على الأداء بمستوى عالٍ.",
+        "أتعامل مع الأخطاء باعتبارها فرصًا للتعلّم والنمو.",
+        "أُفوّض النتائج بوضوح، وأمنح مرونة في كيفية الإنجاز."]},
+      {title:"وظّف نقاط القوة", desc:"معرفة ما يبرع فيه كل شخص وتنميته.", items:[
+        "أسعى بفاعلية لفهم نقاط قوة الآخرين واهتماماتهم.",
+        "أبني علاقات تتيح لي معرفة نقاط قوة الناس بعمق.",
+        "أُرشد الآخرين لتطوير نقاط قوّتهم وتوظيفها.",
+        "أُوائم عملي بانتظام مع نقاط قوّتي.",
+        "أُكوّن الفِرق عن قصد بنقاط قوة متنوّعة ومتكاملة."]}
+    ]
+  }
+
+};
+
+/* ---- strings added for the wizard flow (merged over the locale UI) ---- */
+const EXTRA = {
+  en:{stepOf:"Dimension {n} of {total}", partOf:"Part {n} of {total}", back:"Back", next:"Continue", intro_back:"Start over", relStrength:"Relative strength", growthLabel:"Growth opportunity", langChoose:"Choose your language"},
+  es:{stepOf:"Dimensión {n} de {total}", partOf:"Parte {n} de {total}", back:"Atrás", next:"Continuar", intro_back:"Empezar de nuevo", relStrength:"Fortaleza relativa", growthLabel:"Oportunidad de crecimiento", langChoose:"Elige tu idioma"},
+  ar:{stepOf:"البُعد {n} من {total}", partOf:"الجزء {n} من {total}", back:"رجوع", next:"متابعة", intro_back:"البدء من جديد", relStrength:"قوة نسبية", growthLabel:"فرصة للتطوّر", langChoose:"اختر لغتك"}
+};
+for(const c in EXTRA){ if(LOCALES[c]&&LOCALES[c].ui) Object.assign(LOCALES[c].ui, EXTRA[c]); }
+
+/* ================================================================
+   ENGINE
+   ================================================================ */
+const FALLBACK="en", TOTAL=30, DIMS=6, PER=5, MAXITEM=5, MAXDIM=PER*MAXITEM, MAXTOTAL=DIMS*MAXDIM;
+let activeCode="en";
+
+const numFmt={}, plurals={};
+for(const code in LOCALES){
+  const loc=LOCALES[code];
+  const opts=loc.numbering?{numberingSystem:loc.numbering}:{};
+  numFmt[code]=new Intl.NumberFormat(loc.numLocale||code,opts);
+  plurals[code]=new Intl.PluralRules(loc.numLocale||code);
+}
+const L =()=>LOCALES[activeCode];
+const nf=(n)=>numFmt[activeCode].format(n);
+function ui(path){
+  const get=(o)=>path.split(".").reduce((x,k)=>(x==null?undefined:x[k]),o);
+  let v=get(L().ui); if(v===undefined) v=get(LOCALES[FALLBACK].ui); return v;
+}
+function fmt(str,vars){ return String(str).replace(/\{(\w+)\}/g,(_,k)=>(k in vars?vars[k]:"")); }
+function dims(){ return L().dimensions||LOCALES[FALLBACK].dimensions; }
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+const answers=Array.from({length:DIMS},()=>Array(PER).fill(null));
+const prefersReduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const $=(id)=>document.getElementById(id);
+function setText(id,v){ const el=$(id); if(el) el.textContent=v; }
+function setHTML(id,v){ const el=$(id); if(el) el.innerHTML=v; }
+
+/* fraction display, LTR-isolated so it reads correctly in RTL */
+function frac(n,d){ return '<span dir="ltr">'+nf(n)+'<span class="den">/'+nf(d)+'</span></span>'; }
+
+/* scoring (per dimension) */
+const dimScore=(di)=>answers[di].reduce((s,x)=>s+(x||0),0);
+const answeredCount=()=>answers.flat().filter(x=>x!==null).length;
+
+/* ================================================================
+   QUESTION PAGING
+   The 30 statements are shuffled across pages with no more than two
+   from any one dimension per page. Each answer still records against
+   its dimension, so results break down by dimension as before, while
+   a page no longer maps to a single theme.
+   ================================================================ */
+const PAGE_SIZE=5;
+const PAGE_COUNT=Math.ceil(TOTAL/PAGE_SIZE);
+let pages=[];   // each entry: array of {d,q}
+let pageIx=0;
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0, t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+function buildPages(){
+  const items=[];
+  for(let d=0; d<DIMS; d++) for(let q=0; q<PER; q++) items.push({d,q});
+  for(let attempt=0; attempt<300; attempt++){
+    const bag=shuffle(items.slice());
+    const pg=Array.from({length:PAGE_COUNT},()=>[]);
+    const cnt=Array.from({length:PAGE_COUNT},()=>({}));
+    let ok=true;
+    for(const it of bag){
+      const cand=[];
+      for(let p=0;p<PAGE_COUNT;p++){ if(pg[p].length<PAGE_SIZE && (cnt[p][it.d]||0)<2) cand.push(p); }
+      if(!cand.length){ ok=false; break; }
+      cand.sort((a,b)=>pg[a].length-pg[b].length);   // fill the emptiest valid page
+      const p=cand[0];
+      pg[p].push(it); cnt[p][it.d]=(cnt[p][it.d]||0)+1;
+    }
+    if(ok && pg.every(p=>p.length===PAGE_SIZE)){ pages=pg.map(p=>shuffle(p)); return; }
+  }
+  // deterministic fallback for the 6x5 shape: dimension d is absent from page d
+  const pg=Array.from({length:PAGE_COUNT},()=>[]);
+  for(let d=0; d<DIMS; d++){
+    const qs=shuffle(Array.from({length:PER},(_,q)=>q)); let k=0;
+    for(let p=0;p<PAGE_COUNT;p++){ if(p===d) continue; if(k<qs.length) pg[p].push({d,q:qs[k++]}); }
+  }
+  pages=pg.map(p=>shuffle(p));
+}
+const pageComplete=(p)=>pages[p].every(it=>answers[it.d][it.q]!==null);
+
+/* ================================================================
+   SCREENS + FLOW
+   ================================================================ */
+let phase="language";   // "language" | "intro" | "wizard" | "results"
+
+function showScreen(which){
+  $("screen-language").classList.toggle("active", which==="language");
+  $("screen-intro").classList.toggle("active", which==="intro");
+  $("screen-stage").classList.toggle("active", which==="stage");
+}
+function scrollTop(){ scrollTo({top:0, behavior:prefersReduced?"auto":"smooth"}); }
+function scrollStage(){ $("stage").scrollIntoView({behavior:prefersReduced?"auto":"smooth", block:"start"}); }
+
+const ARROW={
+  down:'<svg slot="suffix" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v10m0 0 4-4m-4 4-4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  fwd:'<svg slot="suffix" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10m0 0-4-4m4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  back:'<svg slot="prefix" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H3m0 0 4-4M3 8l4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+
+function buildLangPicker(){
+  const sel=$("lang"); sel.innerHTML="";
+  for(const code in LOCALES){
+    const o=document.createElement("sl-option");
+    o.value=code; o.textContent=LOCALES[code].label;
+    sel.appendChild(o);
+  }
+  sel.addEventListener("sl-change",(e)=>applyLocale(e.target.value));
+}
+function buildLangButtons(){
+  const box=$("langChoices"); box.innerHTML="";
+  for(const code in LOCALES){
+    const b=document.createElement("sl-button");
+    b.setAttribute("variant","default"); b.setAttribute("size","large");
+    b.className="lang-btn"; b.textContent=LOCALES[code].label;
+    b.addEventListener("click",()=>chooseLang(code));
+    box.appendChild(b);
+  }
+}
+function chooseLang(code){ applyLocale(code); goIntro(); }
+
+/* ---------- intro ---------- */
+function renderIntro(){
+  setText("heroEyebrow", ui("heroEyebrow"));
+  setText("heroTitle",   ui("heroTitle"));
+  setText("heroLede",    ui("heroLede"));
+  setHTML("legendText",  ui("legend"));
+  const key=ui("scaleKey"), cls=["lo","","","","hi"];
+  $("scaleKey").innerHTML=key.map((label,i)=>'<div class="k '+cls[i]+'"><b>'+nf(i+1)+'</b>'+((i===0||i===2||i===4)?esc(label):'')+'</div>').join("");
+  $("beginBtn").innerHTML=esc(ui("begin"))+ARROW.down;
+  setHTML("footer1", ui("footer1"));
+  setHTML("footer2", ui("footer2"));
+  $("lang").setAttribute("aria-label", ui("langLabel"));
+}
+function goIntro(){ phase="intro"; showScreen("intro"); scrollTop(); }
+
+/* ---------- wizard ---------- */
+function startWizard(){
+  phase="wizard"; buildPages(); pageIx=0;
+  $("wizardBody").style.display=""; $("resultsBody").style.display="none";
+  showScreen("stage"); renderPage(); scrollStage();
+}
+function renderPage(){
+  const key=ui("scaleKey"), page=pages[pageIx];
+  setText("stepLabel", fmt(ui("partOf"),{n:nf(pageIx+1),total:nf(PAGE_COUNT)}));
+  $("restartBtn").textContent=ui("reset");
+  let html="";
+  page.forEach((it,i)=>{
+    const text=dims()[it.d].items[it.q], v=answers[it.d][it.q];
+    html+='<div class="q">'+
+      '<sl-radio-group class="scalegrp" data-d="'+it.d+'" data-q="'+it.q+'"'+(v!==null?' value="'+v+'"':'')+'>'+
+        '<span slot="label" class="q-text"><span class="q-n">'+nf(i+1)+'.</span>'+esc(text)+'</span>';
+    for(let val=1;val<=5;val++){ html+='<sl-radio-button value="'+val+'">'+nf(val)+'</sl-radio-button>'; }
+    html+='</sl-radio-group>'+
+      '<div class="scale-ends"><span>'+esc(key[0])+'</span><span class="mid">'+esc(key[2])+'</span><span>'+esc(key[4])+'</span></div>'+
+    '</div>';
+  });
+  $("statements").innerHTML=html;
+  $("statements").querySelectorAll(".scalegrp").forEach(g=>{
+    g.addEventListener("sl-change",()=>{
+      answers[Number(g.dataset.d)][Number(g.dataset.q)]=Number(g.value);
+      updateNav();
+    });
+  });
+  updateNav();
+}
+function updateNav(){
+  $("prog").value=Math.round(answeredCount()/TOTAL*100);
+  const back=$("backBtn"), next=$("nextBtn");
+  back.innerHTML=ARROW.back+esc(ui("back"));
+  const last=pageIx===PAGE_COUNT-1;
+  next.innerHTML=esc(last?ui("reveal"):ui("next"))+(last?ARROW.down:ARROW.fwd);
+  next.toggleAttribute("disabled", !pageComplete(pageIx));
+}
+function goPage(i){ pageIx=Math.max(0,Math.min(PAGE_COUNT-1,i)); renderPage(); scrollStage(); }
+function onBack(){ if(pageIx===0){ goIntro(); } else { goPage(pageIx-1); } }
+function onNext(){ if(pageIx===PAGE_COUNT-1){ gotoResults(); } else { goPage(pageIx+1); } }
+function restart(){ answers.forEach(a=>a.fill(null)); goIntro(); }
+
+/* ---------- results (bar graph, no overall box) ---------- */
+function gotoResults(){
+  phase="results";
+  renderResultsStatic();
+  $("wizardBody").style.display="none";
+  $("resultsBody").style.display="";
+  showScreen("stage");
+  scrollStage();
+  const go=()=>document.querySelectorAll(".brk-bar i").forEach(i=>i.style.width=i.dataset.w+"%");
+  if(prefersReduced){ go(); } else { requestAnimationFrame(()=>requestAnimationFrame(go)); }
+}
+function renderResultsStatic(){
+  setText("resultsEyebrow", ui("resultsEyebrow"));
+  setText("resultsTitle",   ui("resultsTitle"));
+  $("printBtn").innerHTML=esc(ui("print"));
+  renderBreakdown();
+}
+function renderBreakdown(){
+  // sorted high -> low; top two = relative strength, next two = growth opportunity, last two = no label
+  const order=dims().map((_,di)=>di).sort((a,b)=>dimScore(b)-dimScore(a));
+  let html="";
+  order.forEach((di,rank)=>{
+    const dim=dims()[di], sc=dimScore(di);
+    let tag="";
+    if(rank<2)      tag=' <sl-tag class="tag s-strength" size="small" pill>'+esc(ui("relStrength"))+'</sl-tag>';
+    else if(rank<4) tag=' <sl-tag class="tag s-growth" size="small" pill>'+esc(ui("growthLabel"))+'</sl-tag>';
+    html+='<div class="brk"><div class="brk-main">'+
+      '<div class="brk-name">'+esc(dim.title)+tag+'</div>'+
+      '<div class="brk-bar"><i data-w="'+(sc/MAXDIM*100)+'"></i></div>'+
+      '</div><div class="brk-val">'+frac(sc,MAXDIM)+'</div></div>';
+  });
+  $("breakdown").innerHTML=html;
+}
+
+/* ================================================================
+   APPLY LOCALE
+   ================================================================ */
+function applyLocale(code){
+  if(!LOCALES[code]) code=FALLBACK;
+  activeCode=code;
+  const loc=L(), y=scrollY;
+  document.documentElement.lang=code;
+  document.documentElement.dir=loc.dir;
+  document.body.dataset.script=loc.script||"latin";
+  const sel=$("lang");
+  if(sel){
+    if(customElements.get("sl-select")){ (sel.updateComplete||Promise.resolve()).then(()=>{ sel.value=code; }); }
+    else{ sel.setAttribute("value", code); }
+  }
+  setText("langPrompt", ui("langChoose"));
+  renderIntro();
+  if(phase==="wizard") renderPage();
+  if(phase==="results"){
+    renderResultsStatic();
+    document.querySelectorAll(".brk-bar i").forEach(i=>i.style.width=i.dataset.w+"%");
+  }
+  scrollTo({top:y, behavior:"auto"});
+}
+
+/* ================================================================
+   INIT
+   ================================================================ */
+function detectInitial(){
+  const navs=navigator.languages||[navigator.language||"en"];
+  for(const n of navs){ const b=n.toLowerCase().split("-")[0]; if(LOCALES[b]) return b; }
+  return "en";
+}
+
+buildLangPicker();
+buildLangButtons();
+$("beginBtn").addEventListener("click", startWizard);
+$("backBtn").addEventListener("click", onBack);
+$("nextBtn").addEventListener("click", onNext);
+$("restartBtn").addEventListener("click", restart);
+$("printBtn").addEventListener("click", ()=>window.print());
+applyLocale(detectInitial());
+showScreen("language");
+</script>
+</body>
+</html>
