@@ -6,7 +6,9 @@
 <title>Inspirational Leadership — Self-Assessment | Global Leadership Partners</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,18..72,400;0,18..72,500;1,18..72,400&family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Base faces for the interface. A language that needs another script ships its own
+     webfont in its locale file (see locales/README.md) — no change is needed here. -->
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,18..72,400;0,18..72,500;1,18..72,400&display=swap" rel="stylesheet">
 
 <!-- Shoelace: theme + the components this app uses.
      The stylesheet is pinned with an SRI hash. The component modules below cannot be — SRI has
@@ -84,11 +86,8 @@
     --sl-input-font-size-medium:16px;
   }
 
-  /* Per-script font swap. A locale sets <body data-script="…">. */
-  body[data-script="arabic"]{
-    --serif:"Amiri","Noto Naskh Arabic","Times New Roman",serif;
-    --sans:"Noto Sans Arabic","Tajawal",system-ui,sans-serif;
-  }
+  /* Fonts are per-locale data now, not CSS — applyLocale() writes --serif/--sans from the
+     locale file's `font` block, so a new script needs no rule here. */
 
   /* Hide Shoelace elements until their definitions load (no FOUC) */
   sl-radio-group:not(:defined),
@@ -133,6 +132,23 @@
   }
 
   .printdate{display:none}
+
+  /* ---------- boot ---------- */
+  /* Locale files are fetched before anything can render, so cover that gap and give a real
+     message if they never arrive — otherwise a missing locales/ folder is a blank page. */
+  #boot{max-width:560px;margin:0 auto;padding:clamp(60px,14vh,140px) 22px;text-align:center}
+  #boot p{color:var(--muted);font-size:14.5px;margin:0}
+  #bootError{display:none;text-align:start}
+  #bootError h1{font-family:var(--serif);font-weight:400;color:var(--navy);font-size:26px;margin:0 0 10px}
+  #bootError code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+    background:var(--line-soft);padding:1px 5px;border-radius:4px;color:var(--navy);
+  }
+  #bootError ul{margin:10px 0 0;padding-inline-start:20px}
+  #bootError li{margin:4px 0}
+  #boot{display:none}
+  .booting main,.booting footer,.booting .langpick{visibility:hidden}
+  .booting #boot{display:block}
 
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -298,7 +314,7 @@
   }
 </style>
 </head>
-<body data-script="latin">
+<body>
 
 <header class="brandbar">
   <div class="brandbar-inner">
@@ -313,6 +329,21 @@
     </div>
   </div>
 </header>
+
+<!-- Shown only while locale files load, or if they fail. Deliberately in English: at this
+     point we do not yet know what language anything should be in. -->
+<div id="boot">
+  <p id="bootLoading">Loading…</p>
+  <div id="bootError">
+    <h1>This assessment could not load its languages.</h1>
+    <p id="bootErrorDetail"></p>
+    <ul>
+      <li>Check that the <code>locales</code> folder sits beside <code>index.html</code> on the server.</li>
+      <li>Open <code>check.html</code> to test each language file for mistakes.</li>
+      <li>This page must be served over http(s). Opening the file directly from disk will not work.</li>
+    </ul>
+  </div>
+</div>
 
 <main>
   <!-- LANGUAGE LANDING -->
@@ -386,212 +417,28 @@
   <p id="footer2"></p>
 </footer>
 
+<!-- Shared with check.html so a mistake reads the same in the console as in the checker.
+     Optional: if it fails to load the app still runs, just without the warnings. -->
+<script src="locale-schema.js"></script>
 <script>
-const LOCALES = {
-
-  en:{
-    label:"English", dir:"ltr", script:"latin", numLocale:"en-US",
-    ui:{
-      heroEyebrow:"Inspirational Leadership",
-      heroTitle:"How do you lead?",
-      heroLede:"A self-assessment across the six dimensions of leaders who inspire.",
-      legend:'Rate yourself <b>1 to 5</b> on each statement, answering honestly about how you lead today rather than how you hope to. A <b>5</b> means you strongly agree, a <b>3</b> is neutral, and a <b>1</b> means you strongly disagree.',
-      scaleKey:["Strongly disagree","Disagree","Neutral","Agree","Strongly agree"],
-      begin:"Begin the assessment",
-      reveal:"Reveal my leadership profile",
-      remaining:{one:"{n} statement left.",other:"{n} statements left."},
-      resultsEyebrow:"Your profile",
-      resultsTitle:"Six dimensions of inspirational leadership",
-      print:"Print or save as PDF",
-      reset:"Start over",
-      footer1:'<b>Inspirational Leadership Self-Assessment.</b> A reflective tool for leaders who want to grow. Scores describe tendencies, not verdicts, and the pattern across the six matters more than any single number.',
-      footer2:"Provided by Global Leadership Partners, a non-profit equipping leaders of character to make a positive difference. Replace this line and the mark above with the official logo and footer when you publish.",
-      langLabel:"Language"
-    },
-    dimensions:[
-      {title:"Dream Big", desc:"Vision, and the courage to imagine what could be.", items:[
-        "I regularly generate ideas that challenge conventional thinking.",
-        "I am willing to take calculated risks to achieve meaningful goals.",
-        "Others would describe me as more bold than cautious.",
-        "When facing problems, I naturally envision what could be possible.",
-        "I focus more on long-term vision than short-term details."]},
-      {title:"Explain Why", desc:"Purpose that connects the head and the heart.", items:[
-        "I am driven by a desire to make a meaningful difference.",
-        "I emphasize intrinsic motivation (purpose, growth) over external rewards.",
-        "I clearly explain not just what we do, but why it matters.",
-        "I communicate purpose in ways that engage both the head and the heart.",
-        "I am energized by contributing to causes bigger than myself."]},
-      {title:"Build Hope", desc:"Confidence, example, and reasons to believe.", items:[
-        "I lead by example and do not ask others to do what I would not do.",
-        "I consistently communicate confidence that our vision is achievable.",
-        "Others experience me as positive and encouraging.",
-        "I demonstrate character and values that earn trust and respect.",
-        "I intentionally recognize and celebrate progress and success."]},
-      {title:"Show Care", desc:"Attention, presence, and putting others first.", items:[
-        "I listen attentively and seek to fully understand others.",
-        "I take a genuine interest in the lives of those I lead.",
-        "People can count on me during difficult or stressful times.",
-        "I create meaningful and memorable moments for others.",
-        "I prioritize the needs of others and the team over my own."]},
-      {title:"Place Trust", desc:"Belief in others, and the freedom to deliver.", items:[
-        "I assume positive intent in others' actions.",
-        "I avoid unnecessary perfectionism that limits others.",
-        "I trust others to perform at a high level.",
-        "I treat mistakes as opportunities for learning and growth.",
-        "I delegate outcomes clearly and allow flexibility in how work is done."]},
-      {title:"Use Strengths", desc:"Knowing, and growing, what people do best.", items:[
-        "I actively seek to understand others' strengths and interests.",
-        "I build relationships that help me know people's strengths deeply.",
-        "I coach others to develop and apply their strengths.",
-        "I regularly align my own work with my strengths.",
-        "I intentionally build teams with diverse and complementary strengths."]}
-    ]
-  },
-
-  es:{
-    label:"Español", dir:"ltr", script:"latin", numLocale:"es-ES",
-    ui:{
-      heroEyebrow:"Liderazgo que inspira",
-      heroTitle:"¿Cómo lideras?",
-      heroLede:"Una autoevaluación en las seis dimensiones de los líderes que inspiran.",
-      legend:'Puntúate del <b>1 al 5</b> en cada afirmación, respondiendo con honestidad sobre cómo lideras hoy y no sobre cómo te gustaría liderar. Un <b>5</b> significa que estás muy de acuerdo, un <b>3</b> es neutral y un <b>1</b> significa que estás muy en desacuerdo.',
-      scaleKey:["Muy en desacuerdo","En desacuerdo","Neutral","De acuerdo","Muy de acuerdo"],
-      begin:"Comenzar la autoevaluación",
-      reveal:"Ver mi perfil de liderazgo",
-      remaining:{one:"Queda {n} afirmación.",other:"Quedan {n} afirmaciones."},
-      resultsEyebrow:"Tu perfil",
-      resultsTitle:"Seis dimensiones del liderazgo que inspira",
-      print:"Imprimir o guardar como PDF",
-      reset:"Empezar de nuevo",
-      footer1:'<b>Autoevaluación de Liderazgo que Inspira.</b> Una herramienta de reflexión para líderes que quieren crecer. Las puntuaciones describen tendencias, no veredictos, y el conjunto de las seis dice más que cualquier número aislado.',
-      footer2:"Ofrecida por Global Leadership Partners, una organización sin ánimo de lucro que forma líderes de carácter para marcar una diferencia positiva. Sustituye esta línea y el logotipo de arriba por los oficiales al publicar.",
-      langLabel:"Idioma"
-    },
-    dimensions:[
-      {title:"Sueña en grande", desc:"Visión y el valor de imaginar lo que podría ser.", items:[
-        "Genero con frecuencia ideas que desafían el pensamiento convencional.",
-        "Estoy dispuesto a asumir riesgos calculados para lograr metas significativas.",
-        "Los demás me describirían como más audaz que cauteloso.",
-        "Ante los problemas, imagino de forma natural lo que podría ser posible.",
-        "Me centro más en la visión a largo plazo que en los detalles inmediatos."]},
-      {title:"Explica el porqué", desc:"Un propósito que conecta la mente y el corazón.", items:[
-        "Me impulsa el deseo de marcar una diferencia significativa.",
-        "Doy más importancia a la motivación interna (propósito, crecimiento) que a las recompensas externas.",
-        "Explico con claridad no solo lo que hacemos, sino por qué importa.",
-        "Comunico el propósito de maneras que conectan con la mente y con el corazón.",
-        "Me llena de energía contribuir a causas más grandes que yo."]},
-      {title:"Construye esperanza", desc:"Confianza, ejemplo y motivos para creer.", items:[
-        "Predico con el ejemplo y no pido a los demás que hagan lo que yo no haría.",
-        "Comunico de forma constante la confianza en que nuestra visión es alcanzable.",
-        "Los demás me perciben como una persona positiva y alentadora.",
-        "Demuestro un carácter y unos valores que inspiran confianza y respeto.",
-        "Reconozco y celebro de forma intencionada el progreso y los logros."]},
-      {title:"Cuida a las personas", desc:"Atención, presencia y anteponer a los demás.", items:[
-        "Escucho con atención y busco comprender plenamente a los demás.",
-        "Me intereso de forma genuina por la vida de quienes lidero.",
-        "Las personas pueden contar conmigo en momentos difíciles o de tensión.",
-        "Creo momentos significativos y memorables para los demás.",
-        "Antepongo las necesidades de los demás y del equipo a las mías."]},
-      {title:"Confía en los demás", desc:"Creer en los demás y darles libertad para lograrlo.", items:[
-        "Asumo una intención positiva en las acciones de los demás.",
-        "Evito el perfeccionismo innecesario que limita a los demás.",
-        "Confío en que los demás pueden rendir a un alto nivel.",
-        "Trato los errores como oportunidades de aprendizaje y crecimiento.",
-        "Delego resultados con claridad y doy flexibilidad en la forma de hacer el trabajo."]},
-      {title:"Aprovecha las fortalezas", desc:"Conocer, y desarrollar, lo que cada persona hace mejor.", items:[
-        "Busco activamente comprender las fortalezas e intereses de los demás.",
-        "Cultivo relaciones que me permiten conocer a fondo las fortalezas de las personas.",
-        "Acompaño a los demás para que desarrollen y apliquen sus fortalezas.",
-        "Alineo con regularidad mi propio trabajo con mis fortalezas.",
-        "Formo equipos de forma intencionada con fortalezas diversas y complementarias."]}
-    ]
-  },
-
-  ar:{
-    label:"العربية", dir:"rtl", script:"arabic", numLocale:"ar", numbering:"latn",
-    ui:{
-      heroEyebrow:"القيادة المُلهِمة",
-      heroTitle:"كيف تقود؟",
-      heroLede:"تقييم ذاتي عبر الأبعاد الستة للقادة المُلهِمين.",
-      legend:'قيّم نفسك من <b>1 إلى 5</b> في كل عبارة، مجيبًا بصدق عن أسلوبك في القيادة اليوم لا عمّا تتمنّاه. الدرجة <b>5</b> تعني أنك موافق بشدة، و<b>3</b> محايد، و<b>1</b> تعني أنك غير موافق بشدة.',
-      scaleKey:["غير موافق بشدة","غير موافق","محايد","موافق","موافق بشدة"],
-      begin:"ابدأ التقييم",
-      reveal:"أظهِر ملف قيادتي",
-      remaining:{
-        zero:"لم تتبقَّ عبارات.",
-        one:"تبقّت عبارة واحدة.",
-        two:"تبقّت عبارتان.",
-        few:"تبقّت {n} عباراتٍ.",
-        many:"تبقّت {n} عبارةً.",
-        other:"تبقّت {n} عبارة."
-      },
-      resultsEyebrow:"ملفك",
-      resultsTitle:"الأبعاد الستة للقيادة المُلهِمة",
-      print:"اطبع أو احفظ بصيغة PDF",
-      reset:"ابدأ من جديد",
-      footer1:'<b>تقييم ذاتي للقيادة المُلهِمة.</b> أداة تأمّلية للقادة الراغبين في النمو. تصف الدرجات ميولًا لا أحكامًا، والنمط عبر الأبعاد الستة أهم من أي رقم منفرد.',
-      footer2:"مقدَّم من Global Leadership Partners، وهي منظمة غير ربحية تُعِدّ قادةً ذوي أخلاق لإحداث فرقٍ إيجابي. استبدل هذا السطر والشعار أعلاه بالنسخ الرسمية عند النشر.",
-      langLabel:"اللغة"
-    },
-    dimensions:[
-      {title:"احلم بطموح", desc:"الرؤية والجرأة على تخيّل ما يمكن أن يكون.", items:[
-        "أطرح بانتظام أفكارًا تتحدى التفكير السائد.",
-        "أنا مستعد لخوض مخاطر محسوبة لتحقيق أهداف ذات معنى.",
-        "يصفني الآخرون بأنني جريء أكثر مني حذِر.",
-        "عند مواجهة المشكلات، أتخيّل تلقائيًا ما يمكن أن يكون.",
-        "أركّز على الرؤية بعيدة المدى أكثر من التفاصيل الآنية."]},
-      {title:"اشرح الغاية", desc:"غايةٌ تصل بين العقل والقلب.", items:[
-        "تدفعني رغبةٌ في إحداث فرقٍ حقيقي.",
-        "أُغلّب الدافع الداخلي (الغاية والنمو) على المكافآت الخارجية.",
-        "أشرح بوضوح ليس فقط ما نقوم به، بل لماذا يهم.",
-        "أنقل الغاية بأسلوب يخاطب العقل والقلب معًا.",
-        "يمنحني الإسهام في قضايا أكبر من ذاتي طاقةً."]},
-      {title:"ابْنِ الأمل", desc:"الثقة والقدوة وأسبابٌ للإيمان بالرؤية.", items:[
-        "أقود بالقدوة، ولا أطلب من غيري ما لا أقوم به بنفسي.",
-        "أُعبّر باستمرار عن ثقتي بأن رؤيتنا قابلة للتحقيق.",
-        "يراني الآخرون شخصًا إيجابيًا ومُشجِّعًا.",
-        "أُجسّد قيمًا وأخلاقًا تكسب الثقة والاحترام.",
-        "أحرص عن قصد على الاعتراف بالتقدّم والاحتفاء بالنجاح."]},
-      {title:"اهتمّ بالناس", desc:"الإصغاء والحضور وتقديم الآخرين.", items:[
-        "أُصغي باهتمام وأسعى لفهم الآخرين فهمًا كاملًا.",
-        "أهتم اهتمامًا صادقًا بحياة من أقودهم.",
-        "يمكن للناس الاعتماد عليّ في الأوقات الصعبة والمُجهِدة.",
-        "أصنع للآخرين لحظات ذات معنى تبقى في الذاكرة.",
-        "أُقدّم احتياجات الآخرين والفريق على احتياجاتي."]},
-      {title:"امنح الثقة", desc:"الإيمان بالآخرين ومنحهم حرية الإنجاز.", items:[
-        "أفترض حُسن النية في تصرّفات الآخرين.",
-        "أتجنّب الكمالية المُفرِطة التي تُقيّد الآخرين.",
-        "أثق بقدرة الآخرين على الأداء بمستوى عالٍ.",
-        "أتعامل مع الأخطاء باعتبارها فرصًا للتعلّم والنمو.",
-        "أُفوّض النتائج بوضوح، وأمنح مرونة في كيفية الإنجاز."]},
-      {title:"وظّف نقاط القوة", desc:"معرفة ما يبرع فيه كل شخص وتنميته.", items:[
-        "أسعى بفاعلية لفهم نقاط قوة الآخرين واهتماماتهم.",
-        "أبني علاقات تتيح لي معرفة نقاط قوة الناس بعمق.",
-        "أُرشد الآخرين لتطوير نقاط قوّتهم وتوظيفها.",
-        "أُوائم عملي بانتظام مع نقاط قوّتي.",
-        "أُكوّن الفِرق عن قصد بنقاط قوة متنوّعة ومتكاملة."]}
-    ]
-  }
-
-};
-
-/* ---- strings added for the wizard flow (merged over the locale UI) ---- */
-const EXTRA = {
-  en:{partOf:"Part {n} of {total}", back:"Back", next:"Continue", relStrength:"Relative strength", growthLabel:"Growth opportunity", langChoose:"Choose your language"},
-  es:{partOf:"Parte {n} de {total}", back:"Atrás", next:"Continuar", relStrength:"Fortaleza relativa", growthLabel:"Oportunidad de crecimiento", langChoose:"Elige tu idioma"},
-  ar:{partOf:"الجزء {n} من {total}", back:"رجوع", next:"متابعة", relStrength:"قوة نسبية", growthLabel:"فرصة للتطوّر", langChoose:"اختر لغتك"}
-};
-for(const c in EXTRA){ if(LOCALES[c]&&LOCALES[c].ui) Object.assign(LOCALES[c].ui, EXTRA[c]); }
+/* ================================================================
+   LOCALE REGISTRY
+   Filled at runtime from locales/index.json + locales/<code>.json. Adding a language
+   means dropping a JSON file in that folder and naming it in the manifest — no code
+   change. See locales/README.md, and check.html to validate a file before publishing.
+   ================================================================ */
+const LOCALES = {};
 
 /* ================================================================
    ENGINE
    ================================================================ */
-const FALLBACK="en", TOTAL=30, DIMS=6, PER=5, MAXITEM=5, MAXDIM=PER*MAXITEM, MINDIM=PER;
+let FALLBACK="en";
+const TOTAL=30, DIMS=6, PER=5, MAXITEM=5, MAXDIM=PER*MAXITEM, MINDIM=PER;
 let activeCode="en";
 
 const numFmt={}, plurals={};
-for(const code in LOCALES){
-  const loc=LOCALES[code];
+function registerLocale(code,loc){
+  LOCALES[code]=loc;
   const opts=loc.numbering?{numberingSystem:loc.numbering}:{};
   numFmt[code]=new Intl.NumberFormat(loc.numLocale||code,opts);
   plurals[code]=new Intl.PluralRules(loc.numLocale||code);
@@ -603,7 +450,23 @@ function ui(path){
   let v=get(L().ui); if(v===undefined) v=get(LOCALES[FALLBACK].ui); return v;
 }
 function fmt(str,vars){ return String(str).replace(/\{(\w+)\}/g,(_,k)=>(k in vars?vars[k]:"")); }
-function dims(){ return L().dimensions||LOCALES[FALLBACK].dimensions; }
+
+/* Dimensions fall back string by string, not all at once — a half-finished translation
+   should show the lines it has and English for the rest, rather than reverting all 30.
+   Rebuilt once per locale change rather than per render. */
+let activeDims=[];
+function buildDims(){
+  const base=LOCALES[FALLBACK].dimensions, cur=L().dimensions||[];
+  activeDims=base.map((b,i)=>{
+    const c=cur[i]||{};
+    return {
+      title:c.title||b.title,
+      desc: c.desc ||b.desc,
+      items:b.items.map((bi,j)=>(c.items&&c.items[j])||bi)
+    };
+  });
+}
+function dims(){ return activeDims; }
 function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 
 const answers=Array.from({length:DIMS},()=>Array(PER).fill(null));
@@ -854,16 +717,34 @@ function renderBreakdown(){
 /* ================================================================
    APPLY LOCALE
    ================================================================ */
+/* A locale may bring its own webfont, so a new script (Hebrew, Devanagari, Thai …) needs a
+   locale file and nothing else. Each stylesheet is added once and left in place. */
+const fontsAdded=new Set();
+function applyFont(loc){
+  const f=loc.font;
+  const body=document.body.style;
+  if(f&&f.import&&!fontsAdded.has(f.import)){
+    fontsAdded.add(f.import);
+    const link=document.createElement("link");
+    link.rel="stylesheet"; link.href=f.import;
+    document.head.appendChild(link);
+  }
+  // Empty string removes the override and restores the :root defaults.
+  body.setProperty("--serif", (f&&f.serif)||"");
+  body.setProperty("--sans",  (f&&f.sans) ||"");
+}
+
 function applyLocale(code){
   if(!LOCALES[code]) code=FALLBACK;
   activeCode=code;
   const loc=L(), y=scrollY;
+  buildDims();
   document.documentElement.lang=code;
   document.documentElement.dir=loc.dir;
   // Built from copy that is already translated — the tab, and the header of any printed
   // PDF, otherwise stayed English no matter which language was chosen.
   document.title=ui("heroEyebrow")+" — Global Leadership Partners";
-  document.body.dataset.script=loc.script||"latin";
+  applyFont(loc);
   const sel=$("lang");
   if(sel){
     if(customElements.get("sl-select")){ (sel.updateComplete||Promise.resolve()).then(()=>{ sel.value=code; }); }
@@ -885,7 +766,58 @@ function applyLocale(code){
 function detectInitial(){
   const navs=navigator.languages||[navigator.language||"en"];
   for(const n of navs){ const b=n.toLowerCase().split("-")[0]; if(LOCALES[b]) return b; }
-  return "en";
+  return FALLBACK;
+}
+
+/* ---------- loading the language files ---------- */
+const LOCALE_DIR="locales/";
+async function fetchJSON(url){
+  let res;
+  try{ res=await fetch(url,{cache:"no-cache"}); }
+  catch(e){ throw new Error(url+" could not be reached. "+e.message); }
+  if(!res.ok) throw new Error(url+" returned "+res.status+" "+res.statusText+".");
+  try{ return await res.json(); }
+  catch(e){ throw new Error(url+" is not valid JSON — "+e.message+" A stray comma or a smart quote will do this."); }
+}
+
+async function loadLocales(){
+  const manifest=await fetchJSON(LOCALE_DIR+"index.json");
+  const codes=Array.isArray(manifest.locales)?manifest.locales:[];
+  if(!codes.length) throw new Error(LOCALE_DIR+'index.json lists no languages. It needs a "locales" array, e.g. ["en","es"].');
+  FALLBACK=manifest.fallback||codes[0];
+
+  const loaded=await Promise.all(codes.map(async code=>{
+    try{ return {code, data:await fetchJSON(LOCALE_DIR+code+".json")}; }
+    catch(err){ return {code, err}; }
+  }));
+
+  for(const r of loaded){
+    if(r.err){
+      // One broken language must not take down the others. Drop it and say so.
+      console.error("[locale] "+r.code+" was skipped: "+r.err.message);
+      continue;
+    }
+    if(window.LocaleSchema){
+      const problems=window.LocaleSchema.validate(r.data, r.code);
+      for(const p of problems) console[p.level==="error"?"error":"warn"]("[locale] "+r.code+" — "+p.where+": "+p.msg);
+    }
+    registerLocale(r.code, r.data);
+  }
+
+  if(!LOCALES[FALLBACK]){
+    throw new Error('The fallback language "'+FALLBACK+'" failed to load, so there is nothing to fall back to. '+
+                    "Every other language borrows from it for anything it has not translated.");
+  }
+  const skipped=loaded.filter(r=>r.err).map(r=>r.code);
+  if(skipped.length) console.warn("[locale] not available: "+skipped.join(", "));
+}
+
+function showBootError(err){
+  document.documentElement.classList.add("booting");
+  $("bootLoading").style.display="none";
+  $("bootError").style.display="block";
+  setText("bootErrorDetail", err.message);
+  console.error(err);
 }
 
 /* Shoelace loads from a CDN, and `:not(:defined){visibility:hidden}` means a failed load
@@ -902,15 +834,22 @@ function enterFallback(){
 addEventListener("sl-failed", enterFallback);
 setTimeout(enterFallback, 5000);   // covers a hung request, which never rejects
 
-buildLangPicker();
-buildLangButtons();
-$("beginBtn").addEventListener("click", startWizard);
-$("backBtn").addEventListener("click", onBack);
-$("nextBtn").addEventListener("click", onNext);
-$("restartBtn").addEventListener("click", restart);
-$("printBtn").addEventListener("click", ()=>window.print());
-applyLocale(detectInitial());
-showScreen("language");
+document.documentElement.classList.add("booting");
+(async function boot(){
+  try{ await loadLocales(); }
+  catch(err){ showBootError(err); return; }
+
+  buildLangPicker();
+  buildLangButtons();
+  $("beginBtn").addEventListener("click", startWizard);
+  $("backBtn").addEventListener("click", onBack);
+  $("nextBtn").addEventListener("click", onNext);
+  $("restartBtn").addEventListener("click", restart);
+  $("printBtn").addEventListener("click", ()=>window.print());
+  applyLocale(detectInitial());
+  showScreen("language");
+  document.documentElement.classList.remove("booting");
+})();
 </script>
 </body>
 </html>

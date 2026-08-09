@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Language file checker — Inspirational Leadership</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Newsreader:opsz,wght@18..72,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#16263F; --brand-blue:#1A3C6B; --royal:#25548A; --gold-brand:#F0C415;
+    --gold-deep:#856518; --ground:#F2F5FA; --surface:#FFFFFF;
+    --ink:#1A2433; --muted:#566273; --line:#DCE3EE; --line-soft:#EAEFF6;
+    --bad:#A32020; --bad-bg:#FBEEEE; --warn:#7A5A12; --warn-bg:#FDF6E4;
+    --good:#1E6B3A; --good-bg:#EAF5EE;
+    --serif:"Newsreader",Georgia,serif;
+    --sans:"Libre Franklin",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  .brandbar{background:var(--brand-blue);color:#fff;border-bottom:2.5px solid var(--gold-brand);padding:14px 22px}
+  .brandbar div{max-width:960px;margin:0 auto;font-weight:600;letter-spacing:.02em}
+  main{max-width:960px;margin:0 auto;padding:34px 22px 90px}
+  h1{font-family:var(--serif);font-weight:400;color:var(--navy);font-size:clamp(28px,5vw,40px);margin:0 0 8px;letter-spacing:-.01em}
+  .lede{color:var(--muted);margin:0 0 30px;max-width:66ch}
+  h2{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-deep);margin:34px 0 12px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 1px 2px rgba(22,38,63,.04)}
+  label{display:block;font-weight:600;font-size:13.5px;color:var(--navy);margin:0 0 6px}
+  .hint{font-size:13px;color:var(--muted);margin:0 0 10px}
+  input[type=text],textarea{
+    width:100%;font-family:var(--mono);font-size:13px;padding:10px 12px;
+    border:1.5px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);
+  }
+  textarea{min-height:220px;resize:vertical;line-height:1.5}
+  input:focus,textarea:focus{outline:3px solid rgba(37,84,138,.25);outline-offset:1px;border-color:var(--royal)}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
+  .row > div{flex:1 1 200px}
+  button{
+    font:inherit;font-weight:600;font-size:14.5px;padding:11px 20px;border-radius:10px;
+    border:1.5px solid var(--royal);background:var(--royal);color:#fff;cursor:pointer;
+  }
+  button.ghost{background:var(--surface);color:var(--navy);border-color:var(--line)}
+  button:focus-visible{outline:3px solid var(--gold-deep);outline-offset:2px}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .verdict{border-radius:11px;padding:14px 16px;margin:18px 0 0;font-weight:600}
+  .verdict.ok{background:var(--good-bg);color:var(--good)}
+  .verdict.no{background:var(--bad-bg);color:var(--bad)}
+  ul.findings{list-style:none;padding:0;margin:16px 0 0}
+  ul.findings li{
+    display:grid;grid-template-columns:auto minmax(0,200px) 1fr;gap:12px;align-items:baseline;
+    padding:10px 12px;border-radius:9px;margin-bottom:6px;font-size:14px;
+  }
+  li.error{background:var(--bad-bg)} li.warn{background:var(--warn-bg)}
+  .badge{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:20px;white-space:nowrap}
+  li.error .badge{background:var(--bad);color:#fff}
+  li.warn  .badge{background:var(--warn);color:#fff}
+  code,.where{font-family:var(--mono);font-size:12.5px;color:var(--navy);word-break:break-all}
+  .where{font-weight:600}
+  table{border-collapse:collapse;width:100%;font-size:14px;margin-top:4px}
+  th,td{text-align:start;padding:8px 10px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  th{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  td.k{font-family:var(--mono);font-size:12.5px;color:var(--royal);white-space:nowrap}
+  .note{font-size:13.5px;color:var(--muted);margin-top:10px}
+  @media (max-width:640px){
+    ul.findings li{grid-template-columns:1fr;gap:4px}
+    ul.findings .badge{justify-self:start}
+  }
+</style>
+</head>
+<body>
+
+<header class="brandbar"><div>Inspirational Leadership — language file checker</div></header>
+
+<main>
+  <h1>Check a language file</h1>
+  <p class="lede">
+    Paste a <code>.json</code> language file below, or load one that is already published, and this
+    page will tell you in plain English what is missing or wrong before anyone sees it.
+    Nothing is uploaded anywhere — the check runs entirely in this browser.
+  </p>
+
+  <h2>1. Which language</h2>
+  <div class="card">
+    <div class="row">
+      <div>
+        <label for="code">Language code</label>
+        <p class="hint">The short code used for the file name, e.g. <code>de</code> for German, <code>pt-BR</code> for Brazilian Portuguese.</p>
+        <input type="text" id="code" value="de" spellcheck="false" autocomplete="off">
+      </div>
+      <div style="flex:0 0 auto">
+        <button type="button" id="plansBtn">Show what this language needs</button>
+      </div>
+    </div>
+    <div id="plans"></div>
+  </div>
+
+  <h2>2. The file</h2>
+  <div class="card">
+    <label for="src">Paste the contents of the language file</label>
+    <p class="hint">Or load one that is already on this server to check it as published.</p>
+    <textarea id="src" spellcheck="false" placeholder='{&#10;  "label": "Deutsch",&#10;  "dir": "ltr",&#10;  ...&#10;}'></textarea>
+    <div class="actions">
+      <button type="button" id="checkBtn">Check this file</button>
+      <button type="button" class="ghost" id="loadBtn">Load published file</button>
+      <button type="button" class="ghost" id="tplBtn">Download a starter file</button>
+    </div>
+  </div>
+
+  <div id="out"></div>
+</main>
+
+<script src="locale-schema.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const S=window.LocaleSchema;
+
+if(!S){
+  $("out").innerHTML='<div class="verdict no">locale-schema.js did not load, so nothing can be checked. It must sit beside this page.</div>';
+}
+
+/* ---- what does this language need? ---- */
+function showPlans(){
+  const code=$("code").value.trim()||"en";
+  let valid=true;
+  try{ new Intl.NumberFormat(code); }catch(e){ valid=false; }
+  if(!valid){
+    $("plans").innerHTML='<div class="verdict no">“'+esc(code)+'” is not a language code this browser recognises. '+
+      'Use a standard code such as <code>de</code>, <code>fr</code>, <code>pt-BR</code> or <code>zh-Hant</code>.</div>';
+    return;
+  }
+  const need=S.requiredPlurals(code);
+  const cats=Object.keys(need);
+  const name=(()=>{ try{ return new Intl.DisplayNames([navigator.language||"en"],{type:"language"}).of(code); }catch(e){ return code; } })();
+  let rows="";
+  for(const cat of cats){
+    rows+='<tr><td class="k">'+esc(cat)+'</td><td>used when the number is '+need[cat].join(", ")+
+          '</td><td>'+(need[cat].length>1?'must contain <code>{n}</code>':'the number can be written into the words')+'</td></tr>';
+  }
+  $("plans").innerHTML=
+    '<p class="note"><b>'+esc(name)+'</b> ('+esc(code)+') is written '+
+      (new Intl.Locale(code).getTextInfo?.().direction==="rtl"||/^(ar|he|fa|ur|ps|sd|ug|yi)\b/.test(code)?
+        'right-to-left, so set <code>"dir": "rtl"</code>.':'left-to-right, so set <code>"dir": "ltr"</code>.')+'</p>'+
+    '<p class="note">The only number this tool ever shows is how many statements are left on a page, 1 to 5. '+
+      'For '+esc(name)+' that needs <b>'+cats.length+'</b> plural form'+(cats.length===1?'':'s')+' in <code>ui.remaining</code>:</p>'+
+    '<table><thead><tr><th>form</th><th>when</th><th>note</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+    '<p class="note">A full grammar reference for this language may list more plural forms than this. '+
+      'Because the number here is only ever 1 to 5, the forms above are the only ones you need.</p>';
+}
+
+/* ---- run the check ---- */
+function runCheck(){
+  const code=$("code").value.trim()||"xx";
+  const raw=$("src").value.trim();
+  if(!raw){ $("out").innerHTML='<div class="verdict no">Nothing to check — paste a file above first.</div>'; return; }
+
+  let data;
+  try{ data=JSON.parse(raw); }
+  catch(e){
+    $("out").innerHTML='<div class="verdict no">This is not valid JSON, so nothing else can be checked yet.</div>'+
+      '<ul class="findings"><li class="error"><span class="badge">error</span><span class="where">(file)</span><span>'+esc(e.message)+
+      '<br><span class="note">Most often: a comma after the last item in a list, a missing quote mark, '+
+      'or curly “smart quotes” pasted from a word processor.</span></span></li></ul>';
+    return;
+  }
+
+  const problems=S.validate(data, code);
+  const errors=problems.filter(p=>p.level==="error");
+  const warns =problems.filter(p=>p.level==="warn");
+
+  let html;
+  if(!errors.length && !warns.length){
+    html='<div class="verdict ok">This file is complete and ready to publish. '+
+         'Save it as <code>locales/'+esc(code)+'.json</code> and add <code>"'+esc(code)+'"</code> to <code>locales/index.json</code>.</div>';
+  }else if(!errors.length){
+    html='<div class="verdict ok">No errors — this file will work. '+warns.length+' thing'+(warns.length===1?'':'s')+' worth a look:</div>';
+  }else{
+    html='<div class="verdict no">'+errors.length+' problem'+(errors.length===1?'':'s')+' must be fixed'+
+         (warns.length?', and '+warns.length+' worth a look':'')+'.</div>';
+  }
+  html+='<ul class="findings">';
+  for(const p of errors.concat(warns)){
+    html+='<li class="'+p.level+'"><span class="badge">'+p.level+'</span>'+
+          '<span class="where">'+esc(p.where)+'</span><span>'+esc(p.msg)+'</span></li>';
+  }
+  html+='</ul>';
+  $("out").innerHTML=html;
+}
+
+/* ---- load a published file ---- */
+async function loadPublished(){
+  const code=$("code").value.trim();
+  try{
+    const res=await fetch("locales/"+code+".json",{cache:"no-cache"});
+    if(!res.ok) throw new Error("locales/"+code+".json returned "+res.status+".");
+    $("src").value=await res.text();
+    runCheck();
+  }catch(e){
+    $("out").innerHTML='<div class="verdict no">Could not load <code>locales/'+esc(code)+'.json</code> — '+esc(e.message)+'</div>';
+  }
+}
+
+/* ---- starter file, built from the published fallback so the English is already in place ---- */
+async function downloadTemplate(){
+  const code=$("code").value.trim()||"xx";
+  let base;
+  try{
+    const mf=await (await fetch("locales/index.json",{cache:"no-cache"})).json();
+    base=await (await fetch("locales/"+(mf.fallback||"en")+".json",{cache:"no-cache"})).json();
+  }catch(e){
+    $("out").innerHTML='<div class="verdict no">Could not build a starter file: '+esc(e.message)+'</div>';
+    return;
+  }
+  const need=S.requiredPlurals(code);
+  const tpl=JSON.parse(JSON.stringify(base));
+  tpl.label="";                       // must be written in the new language
+  tpl.numLocale=code;
+  delete tpl.font;                    // only needed for a different script
+  const remaining={};
+  for(const cat of Object.keys(need)) remaining[cat]=base.ui.remaining[cat]||base.ui.remaining.other||"{n} left.";
+  tpl.ui.remaining=remaining;
+
+  const blob=new Blob([JSON.stringify(tpl,null,2)+"\n"],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=code+".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+  $("out").innerHTML='<div class="verdict ok">Downloaded <code>'+esc(code)+'.json</code>. '+
+    'Every value is still in English — translate each one, fill in <code>label</code> with the language name '+
+    'as written in that language, then come back and check it.</div>';
+}
+
+$("plansBtn").addEventListener("click", showPlans);
+$("checkBtn").addEventListener("click", runCheck);
+$("loadBtn").addEventListener("click", loadPublished);
+$("tplBtn").addEventListener("click", downloadTemplate);
+showPlans();
+</script>
+</body>
+</html>

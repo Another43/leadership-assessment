@@ -1,0 +1,105 @@
+{
+  "label": "English",
+  "dir": "ltr",
+  "numLocale": "en-US",
+  "ui": {
+    "heroEyebrow": "Inspirational Leadership",
+    "heroTitle": "How do you lead?",
+    "heroLede": "A self-assessment across the six dimensions of leaders who inspire.",
+    "legend": "Rate yourself <b>1 to 5</b> on each statement, answering honestly about how you lead today rather than how you hope to. A <b>5</b> means you strongly agree, a <b>3</b> is neutral, and a <b>1</b> means you strongly disagree.",
+    "scaleKey": [
+      "Strongly disagree",
+      "Disagree",
+      "Neutral",
+      "Agree",
+      "Strongly agree"
+    ],
+    "begin": "Begin the assessment",
+    "reveal": "Reveal my leadership profile",
+    "remaining": {
+      "one": "{n} statement left.",
+      "other": "{n} statements left."
+    },
+    "resultsEyebrow": "Your profile",
+    "resultsTitle": "Six dimensions of inspirational leadership",
+    "print": "Print or save as PDF",
+    "reset": "Start over",
+    "footer1": "<b>Inspirational Leadership Self-Assessment.</b> A reflective tool for leaders who want to grow. Scores describe tendencies, not verdicts, and the pattern across the six matters more than any single number.",
+    "footer2": "Provided by Global Leadership Partners, a non-profit equipping leaders of character to make a positive difference. Replace this line and the mark above with the official logo and footer when you publish.",
+    "langLabel": "Language",
+    "partOf": "Part {n} of {total}",
+    "back": "Back",
+    "next": "Continue",
+    "relStrength": "Relative strength",
+    "growthLabel": "Growth opportunity",
+    "langChoose": "Choose your language"
+  },
+  "dimensions": [
+    {
+      "title": "Dream Big",
+      "desc": "Vision, and the courage to imagine what could be.",
+      "items": [
+        "I regularly generate ideas that challenge conventional thinking.",
+        "I am willing to take calculated risks to achieve meaningful goals.",
+        "Others would describe me as more bold than cautious.",
+        "When facing problems, I naturally envision what could be possible.",
+        "I focus more on long-term vision than short-term details."
+      ]
+    },
+    {
+      "title": "Explain Why",
+      "desc": "Purpose that connects the head and the heart.",
+      "items": [
+        "I am driven by a desire to make a meaningful difference.",
+        "I emphasize intrinsic motivation (purpose, growth) over external rewards.",
+        "I clearly explain not just what we do, but why it matters.",
+        "I communicate purpose in ways that engage both the head and the heart.",
+        "I am energized by contributing to causes bigger than myself."
+      ]
+    },
+    {
+      "title": "Build Hope",
+      "desc": "Confidence, example, and reasons to believe.",
+      "items": [
+        "I lead by example and do not ask others to do what I would not do.",
+        "I consistently communicate confidence that our vision is achievable.",
+        "Others experience me as positive and encouraging.",
+        "I demonstrate character and values that earn trust and respect.",
+        "I intentionally recognize and celebrate progress and success."
+      ]
+    },
+    {
+      "title": "Show Care",
+      "desc": "Attention, presence, and putting others first.",
+      "items": [
+        "I listen attentively and seek to fully understand others.",
+        "I take a genuine interest in the lives of those I lead.",
+        "People can count on me during difficult or stressful times.",
+        "I create meaningful and memorable moments for others.",
+        "I prioritize the needs of others and the team over my own."
+      ]
+    },
+    {
+      "title": "Place Trust",
+      "desc": "Belief in others, and the freedom to deliver.",
+      "items": [
+        "I assume positive intent in others' actions.",
+        "I avoid unnecessary perfectionism that limits others.",
+        "I trust others to perform at a high level.",
+        "I treat mistakes as opportunities for learning and growth.",
+        "I delegate outcomes clearly and allow flexibility in how work is done."
+      ]
+    },
+    {
+      "title": "Use Strengths",
+      "desc": "Knowing, and growing, what people do best.",
+      "items": [
+        "I actively seek to understand others' strengths and interests.",
+        "I build relationships that help me know people's strengths deeply.",
+        "I coach others to develop and apply their strengths.",
+        "I regularly align my own work with my strengths.",
+        "I intentionally build teams with diverse and complementary strengths."
+      ]
+    }
+  ]
+}

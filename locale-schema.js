@@ -1,0 +1,198 @@
+/* ============================================================================
+   LOCALE SCHEMA — the single description of what a language file must contain.
+   Loaded by index.html (warns in the console) and by check.html (reports to a
+   translator). Keep the two in step by changing this file only.
+   ============================================================================ */
+(function (root, factory) {
+  if (typeof module === "object" && module.exports) module.exports = factory();
+  else root.LocaleSchema = factory();
+})(typeof self !== "undefined" ? self : this, function () {
+
+  var DIMS = 6;        // dimensions in the assessment
+  var PER = 5;         // statements per dimension
+  var SCALE = 5;       // points on the rating scale
+  var MAX_COUNT = 5;   // largest number the "statements left" message ever shows
+
+  /* Every key the interface reads.
+     html:   this value may contain <b>/<strong>/<em>/<i>; every other value is plain text
+     list:   this value is an array of exactly N strings
+     plural: this value is an object of plural forms, not a string
+     vars:   placeholders that must survive translation                              */
+  var UI = {
+    heroEyebrow:    {},
+    heroTitle:      {},
+    heroLede:       {},
+    legend:         { html: true },
+    scaleKey:       { list: SCALE },
+    begin:          {},
+    reveal:         {},
+    remaining:      { plural: true },
+    resultsEyebrow: {},
+    resultsTitle:   {},
+    print:          {},
+    reset:          {},
+    footer1:        { html: true },
+    footer2:        {},
+    langLabel:      {},
+    partOf:         { vars: ["n", "total"] },
+    back:           {},
+    next:           {},
+    relStrength:    {},
+    growthLabel:    {},
+    langChoose:     {}
+  };
+
+  var ALLOWED_TAGS = ["b", "strong", "em", "i"];
+
+  /* Which plural forms this language actually needs *for this tool*.
+     Arabic's CLDR table has six categories, but the only number shown here is how many
+     statements are left on a page — 1 to 5 — so Arabic needs three, not six. Returns
+     { category: [numbers that use it] } so a translator can be told precisely. */
+  function requiredPlurals(numLocale) {
+    var pr, need = {};
+    try { pr = new Intl.PluralRules(numLocale); }
+    catch (e) { pr = new Intl.PluralRules("en"); }
+    for (var n = 1; n <= MAX_COUNT; n++) {
+      var cat = pr.select(n);
+      (need[cat] = need[cat] || []).push(n);
+    }
+    return need;
+  }
+
+  function isStr(v) { return typeof v === "string" && v.trim() !== ""; }
+
+  function textIssues(where, s) {
+    var out = [];
+    if (/[“”‘’]/.test(s))
+      out.push({ level: "warn", where: where, msg: "Contains curly quotes pasted from a word processor. Use straight quotes." });
+    if (/ /.test(s))
+      out.push({ level: "warn", where: where, msg: "Contains a non-breaking space." });
+    if (s !== s.trim())
+      out.push({ level: "warn", where: where, msg: "Has leading or trailing spaces." });
+    return out;
+  }
+
+  function htmlIssues(where, s, allowed) {
+    var out = [], re = /<\s*\/?\s*([a-zA-Z][a-zA-Z0-9]*)[^>]*>/g, m, open = [];
+    while ((m = re.exec(s))) {
+      var tag = m[1].toLowerCase(), closing = /^<\s*\//.test(m[0]);
+      if (!allowed) {
+        // One complaint per value, not one per angle bracket.
+        out.push({ level: "error", where: where, msg: "This value must be plain text, but contains <" + tag + ">." });
+        break;
+      }
+      if (ALLOWED_TAGS.indexOf(tag) === -1) {
+        out.push({ level: "error", where: where, msg: "<" + tag + "> is not allowed here. Use only: " + ALLOWED_TAGS.join(", ") + "." });
+        continue;
+      }
+      if (closing) {
+        if (open.pop() !== tag) out.push({ level: "error", where: where, msg: "Closing </" + tag + "> does not match the tag it should close." });
+      } else open.push(tag);
+    }
+    if (open.length) out.push({ level: "error", where: where, msg: "Tag <" + open[open.length - 1] + "> is never closed." });
+    return out;
+  }
+
+  function varIssues(where, s, vars) {
+    var out = [];
+    (vars || []).forEach(function (v) {
+      if (s.indexOf("{" + v + "}") === -1)
+        out.push({ level: "error", where: where, msg: "Must keep the placeholder {" + v + "} — it is replaced by a number." });
+    });
+    (s.match(/\{(\w+)\}/g) || []).forEach(function (found) {
+      var name = found.slice(1, -1);
+      if ((vars || []).indexOf(name) === -1)
+        out.push({ level: "warn", where: where, msg: found + " is not a placeholder this line understands; it will print literally." });
+    });
+    return out;
+  }
+
+  /* Returns a flat list of {level, where, msg}. level is "error" (the language will not
+     work properly) or "warn" (it will work, but check it). An empty list means good. */
+  function validate(loc, code) {
+    var out = [];
+    var err = function (where, msg) { out.push({ level: "error", where: where, msg: msg }); };
+    var warn = function (where, msg) { out.push({ level: "warn", where: where, msg: msg }); };
+
+    if (!loc || typeof loc !== "object") { err("(file)", "The file did not contain a JSON object."); return out; }
+
+    if (!isStr(loc.label)) err("label", 'Missing. This is the language name as it appears in the picker, written in that language (e.g. "Deutsch").');
+    if (loc.dir !== "ltr" && loc.dir !== "rtl") err("dir", 'Must be "ltr" (left-to-right) or "rtl" (right-to-left, e.g. Arabic or Hebrew).');
+    if (!isStr(loc.numLocale)) err("numLocale", 'Missing. A BCP-47 code used to format numbers and dates, e.g. "de" or "pt-BR".');
+    else {
+      try { new Intl.NumberFormat(loc.numLocale); }
+      catch (e) { err("numLocale", '"' + loc.numLocale + '" is not a language code this browser recognises.'); }
+    }
+    if (loc.font && typeof loc.font !== "object") err("font", "If present, must be an object with import, serif and sans.");
+
+    /* ---- ui ---- */
+    if (!loc.ui || typeof loc.ui !== "object") { err("ui", "Missing. This holds every interface string."); }
+    else {
+      Object.keys(UI).forEach(function (k) {
+        var spec = UI[k], v = loc.ui[k], where = "ui." + k;
+
+        if (spec.list) {
+          if (!Array.isArray(v)) return err(where, "Missing. Must be a list of " + spec.list + " labels, from strongly disagree to strongly agree.");
+          if (v.length !== spec.list) err(where, "Has " + v.length + " labels; it needs exactly " + spec.list + ".");
+          v.forEach(function (s, i) {
+            if (!isStr(s)) return err(where + "[" + i + "]", "Empty.");
+            out = out.concat(textIssues(where + "[" + i + "]", s), htmlIssues(where + "[" + i + "]", s, false));
+          });
+          return;
+        }
+
+        if (spec.plural) {
+          if (!v || typeof v !== "object" || Array.isArray(v)) return err(where, "Missing. Must be an object of plural forms — see the note about this language below.");
+          var need = requiredPlurals(loc.numLocale || code);
+          Object.keys(need).forEach(function (cat) {
+            var form = v[cat], ns = need[cat];
+            if (!isStr(form)) return err(where + "." + cat, "Missing. This language uses this form for: " + ns.join(", ") + ".");
+            if (ns.length > 1 && form.indexOf("{n}") === -1)
+              err(where + "." + cat, "Used for " + ns.join(", ") + ", so it must include {n} or the number is lost.");
+            out = out.concat(textIssues(where + "." + cat, form), htmlIssues(where + "." + cat, form, false));
+          });
+          Object.keys(v).forEach(function (cat) {
+            if (!need[cat]) warn(where + "." + cat, "Not needed for this language; it will never be shown. Harmless.");
+          });
+          return;
+        }
+
+        if (!isStr(v)) return err(where, "Missing or empty.");
+        out = out.concat(textIssues(where, v), htmlIssues(where, v, !!spec.html), varIssues(where, v, spec.vars));
+      });
+
+      Object.keys(loc.ui).forEach(function (k) {
+        if (!UI[k]) warn("ui." + k, "Not a key this tool reads; it will be ignored. Check the spelling.");
+      });
+    }
+
+    /* ---- dimensions ---- */
+    if (!Array.isArray(loc.dimensions)) err("dimensions", "Missing. Must be a list of " + DIMS + " dimensions.");
+    else {
+      if (loc.dimensions.length !== DIMS) err("dimensions", "Has " + loc.dimensions.length + " dimensions; it needs exactly " + DIMS + ", in the same order as the English file.");
+      loc.dimensions.forEach(function (d, i) {
+        var where = "dimensions[" + i + "]";
+        if (!d || typeof d !== "object") return err(where, "Not an object.");
+        ["title", "desc"].forEach(function (k) {
+          if (!isStr(d[k])) return err(where + "." + k, "Missing or empty.");
+          out = out.concat(textIssues(where + "." + k, d[k]), htmlIssues(where + "." + k, d[k], false));
+        });
+        if (!Array.isArray(d.items)) return err(where + ".items", "Missing. Must be a list of " + PER + " statements.");
+        if (d.items.length !== PER) err(where + ".items", "Has " + d.items.length + " statements; it needs exactly " + PER + ", in the same order as the English file.");
+        d.items.forEach(function (s, j) {
+          if (!isStr(s)) return err(where + ".items[" + j + "]", "Empty.");
+          out = out.concat(textIssues(where + ".items[" + j + "]", s), htmlIssues(where + ".items[" + j + "]", s, false));
+        });
+      });
+    }
+
+    return out;
+  }
+
+  return {
+    DIMS: DIMS, PER: PER, SCALE: SCALE, MAX_COUNT: MAX_COUNT,
+    UI_KEYS: UI, ALLOWED_TAGS: ALLOWED_TAGS,
+    requiredPlurals: requiredPlurals,
+    validate: validate
+  };
+});

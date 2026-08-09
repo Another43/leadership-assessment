@@ -1,0 +1,105 @@
+{
+  "label": "Español",
+  "dir": "ltr",
+  "numLocale": "es-ES",
+  "ui": {
+    "heroEyebrow": "Liderazgo que inspira",
+    "heroTitle": "¿Cómo lideras?",
+    "heroLede": "Una autoevaluación en las seis dimensiones de los líderes que inspiran.",
+    "legend": "Puntúate del <b>1 al 5</b> en cada afirmación, respondiendo con honestidad sobre cómo lideras hoy y no sobre cómo te gustaría liderar. Un <b>5</b> significa que estás muy de acuerdo, un <b>3</b> es neutral y un <b>1</b> significa que estás muy en desacuerdo.",
+    "scaleKey": [
+      "Muy en desacuerdo",
+      "En desacuerdo",
+      "Neutral",
+      "De acuerdo",
+      "Muy de acuerdo"
+    ],
+    "begin": "Comenzar la autoevaluación",
+    "reveal": "Ver mi perfil de liderazgo",
+    "remaining": {
+      "one": "Queda {n} afirmación.",
+      "other": "Quedan {n} afirmaciones."
+    },
+    "resultsEyebrow": "Tu perfil",
+    "resultsTitle": "Seis dimensiones del liderazgo que inspira",
+    "print": "Imprimir o guardar como PDF",
+    "reset": "Empezar de nuevo",
+    "footer1": "<b>Autoevaluación de Liderazgo que Inspira.</b> Una herramienta de reflexión para líderes que quieren crecer. Las puntuaciones describen tendencias, no veredictos, y el conjunto de las seis dice más que cualquier número aislado.",
+    "footer2": "Ofrecida por Global Leadership Partners, una organización sin ánimo de lucro que forma líderes de carácter para marcar una diferencia positiva. Sustituye esta línea y el logotipo de arriba por los oficiales al publicar.",
+    "langLabel": "Idioma",
+    "partOf": "Parte {n} de {total}",
+    "back": "Atrás",
+    "next": "Continuar",
+    "relStrength": "Fortaleza relativa",
+    "growthLabel": "Oportunidad de crecimiento",
+    "langChoose": "Elige tu idioma"
+  },
+  "dimensions": [
+    {
+      "title": "Sueña en grande",
+      "desc": "Visión y el valor de imaginar lo que podría ser.",
+      "items": [
+        "Genero con frecuencia ideas que desafían el pensamiento convencional.",
+        "Estoy dispuesto a asumir riesgos calculados para lograr metas significativas.",
+        "Los demás me describirían como más audaz que cauteloso.",
+        "Ante los problemas, imagino de forma natural lo que podría ser posible.",
+        "Me centro más en la visión a largo plazo que en los detalles inmediatos."
+      ]
+    },
+    {
+      "title": "Explica el porqué",
+      "desc": "Un propósito que conecta la mente y el corazón.",
+      "items": [
+        "Me impulsa el deseo de marcar una diferencia significativa.",
+        "Doy más importancia a la motivación interna (propósito, crecimiento) que a las recompensas externas.",
+        "Explico con claridad no solo lo que hacemos, sino por qué importa.",
+        "Comunico el propósito de maneras que conectan con la mente y con el corazón.",
+        "Me llena de energía contribuir a causas más grandes que yo."
+      ]
+    },
+    {
+      "title": "Construye esperanza",
+      "desc": "Confianza, ejemplo y motivos para creer.",
+      "items": [
+        "Predico con el ejemplo y no pido a los demás que hagan lo que yo no haría.",
+        "Comunico de forma constante la confianza en que nuestra visión es alcanzable.",
+        "Los demás me perciben como una persona positiva y alentadora.",
+        "Demuestro un carácter y unos valores que inspiran confianza y respeto.",
+        "Reconozco y celebro de forma intencionada el progreso y los logros."
+      ]
+    },
+    {
+      "title": "Cuida a las personas",
+      "desc": "Atención, presencia y anteponer a los demás.",
+      "items": [
+        "Escucho con atención y busco comprender plenamente a los demás.",
+        "Me intereso de forma genuina por la vida de quienes lidero.",
+        "Las personas pueden contar conmigo en momentos difíciles o de tensión.",
+        "Creo momentos significativos y memorables para los demás.",
+        "Antepongo las necesidades de los demás y del equipo a las mías."
+      ]
+    },
+    {
+      "title": "Confía en los demás",
+      "desc": "Creer en los demás y darles libertad para lograrlo.",
+      "items": [
+        "Asumo una intención positiva en las acciones de los demás.",
+        "Evito el perfeccionismo innecesario que limita a los demás.",
+        "Confío en que los demás pueden rendir a un alto nivel.",
+        "Trato los errores como oportunidades de aprendizaje y crecimiento.",
+        "Delego resultados con claridad y doy flexibilidad en la forma de hacer el trabajo."
+      ]
+    },
+    {
+      "title": "Aprovecha las fortalezas",
+      "desc": "Conocer, y desarrollar, lo que cada persona hace mejor.",
+      "items": [
+        "Busco activamente comprender las fortalezas e intereses de los demás.",
+        "Cultivo relaciones que me permiten conocer a fondo las fortalezas de las personas.",
+        "Acompaño a los demás para que desarrollen y apliquen sus fortalezas.",
+        "Alineo con regularidad mi propio trabajo con mis fortalezas.",
+        "Formo equipos de forma intencionada con fortalezas diversas y complementarias."
+      ]
+    }
+  ]
+}
