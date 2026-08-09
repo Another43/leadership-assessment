@@ -8,10 +8,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,18..72,400;0,18..72,500;1,18..72,400&family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- Shoelace: theme + the components this app uses -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css">
+<!-- Shoelace: theme + the components this app uses.
+     The stylesheet is pinned with an SRI hash. The component modules below cannot be — SRI has
+     no effect on dynamic import() — so a compromised CDN could still run script here. Self-host
+     the seven modules alongside this file if that risk matters for where it's published. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css"
+      integrity="sha384-VNjXcWTFgkXi1VXtuRlXBLNB44AvISAfti9WbOPCBCiNPnUpJ6dHx1Y3XmTii9pB"
+      crossorigin="anonymous">
 <script type="module">
   const SL = "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/";
+  try {
   await Promise.all([
     "components/button/button.js",
     "components/select/select.js",
@@ -23,6 +29,11 @@
     "components/progress-bar/progress-bar.js"
   ].map(p => import(SL + p)));
   document.documentElement.classList.add("sl-ready");
+  } catch (e) {
+    // Blocked, offline, or the CDN is down. Tell the app so it can render native controls
+    // instead of leaving a page of invisible buttons.
+    window.dispatchEvent(new Event("sl-failed"));
+  }
 </script>
 
 <style>
@@ -86,6 +97,42 @@
   sl-select:not(:defined),
   sl-tag:not(:defined),
   sl-card:not(:defined){visibility:hidden}
+
+  /* Shoelace is served from a CDN. If it never arrives, the rule above would leave every
+     button invisible with no explanation, so .sl-fallback un-hides what still works and the
+     script swaps the rating scale for native radios. See enterFallback(). */
+  .sl-fallback sl-button:not(:defined),
+  .sl-fallback sl-tag:not(:defined){visibility:visible}
+  .sl-fallback sl-button:not(:defined){
+    display:inline-block;cursor:pointer;border:1.5px solid var(--line);border-radius:11px;
+    background:var(--surface);color:var(--navy);padding:12px 22px;font-weight:600;font-size:15px;
+  }
+  .sl-fallback sl-button:not(:defined)[variant="primary"]{background:var(--royal);color:#fff;border-color:var(--royal)}
+  .sl-fallback sl-button:not(:defined)[disabled]{opacity:.45;cursor:not-allowed}
+  .sl-fallback sl-button:not(:defined) svg{display:none}
+  .sl-fallback .langpick,
+  .sl-fallback sl-progress-bar:not(:defined){display:none}
+
+  /* Native rating scale — only rendered when Shoelace is unavailable. */
+  .nativescale{display:flex;gap:8px;width:100%;margin-top:14px}
+  .nativescale .nb{flex:1 1 0;position:relative}
+  .nativescale input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+  .nativescale .nb span{
+    display:block;text-align:center;padding:14px 0;border:1.5px solid var(--line);border-radius:11px;
+    background:var(--surface);color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;
+  }
+  .nativescale input:checked + span{background:var(--royal);border-color:var(--royal);color:#fff}
+  .nativescale input:focus-visible + span{outline:3px solid var(--gold-deep);outline-offset:2px}
+  fieldset.scalegrp{border:0;margin:0;padding:0;min-width:0}
+  fieldset.scalegrp > legend{padding:0}
+
+  /* Available to screen readers, never shown. Carries the scale anchor onto each numeral. */
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+  }
+
+  .printdate{display:none}
 
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -154,7 +201,15 @@
   .lang-prompt{font-family:var(--serif);font-weight:400;color:var(--navy);font-size:clamp(24px,4vw,34px);margin:0 0 30px}
   .lang-choices{display:flex;flex-direction:column;gap:12px;max-width:340px;margin:0 auto}
   .lang-btn::part(base){width:100%;justify-content:center}
-  .step-label{font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:var(--gold-deep)}
+  .step-label{
+    display:inline-block;margin:0;font-family:var(--sans);
+    font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:var(--gold-deep);
+  }
+  /* Focus lands here after each page change so keyboard and screen reader users are moved to
+     the new questions instead of being stranded on the Continue button. */
+  .step-label:focus{outline:none}
+  .step-label:focus-visible{outline:2px solid var(--gold-deep);outline-offset:5px;border-radius:3px}
+  .navnote{text-align:center;font-size:13px;color:var(--muted);margin:12px 0 0;min-height:1.2em}
 
   .q{padding:22px 0;border-bottom:1px solid var(--line-soft)}
   .q:last-of-type{border-bottom:0}
@@ -192,9 +247,8 @@
   .brk-name{font-family:var(--serif);font-size:18px;color:var(--navy);font-weight:500;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   sl-tag.tag::part(base){border:0;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:2px 9px}
   sl-tag.s-strength::part(base){background:rgba(201,154,58,.16);color:var(--gold-deep)}
-  sl-tag.s-solid::part(base){background:rgba(37,84,138,.12);color:var(--royal)}
-  sl-tag.s-developing::part(base){background:var(--line-soft);color:var(--muted)}
   sl-tag.s-growth::part(base){background:var(--line-soft);color:var(--muted)}
+  .brk-desc{font-size:13px;color:var(--muted);margin-top:3px}
   .brk-bar{height:6px;background:var(--line-soft);border-radius:4px;overflow:hidden;margin-top:10px}
   .brk-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--royal),#3a6fae);border-radius:4px;width:0;transition:width .9s cubic-bezier(.22,1,.36,1)}
   .brk-val{font-family:var(--serif);font-size:24px;color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -228,8 +282,16 @@
 
   /* ---------- print ---------- */
   @media print{
-    .brandbar,.wizhead,.nav,.nav-restart,.actions,#screen-intro,#screen-language{display:none !important}
+    .wizhead,.nav,.nav-restart,.actions,.langpick,#screen-intro,#screen-language{display:none !important}
     body{background:#fff}
+    /* The wordmark is white and gold on transparency, so it only reads against its blue
+       backing — keep the bar rather than handing someone an unbranded sheet. Browsers drop
+       background colour when printing unless told otherwise, which would also have left
+       every score bar blank on the one output this tool has. */
+    .brandbar{position:static}
+    .brandbar,.brk-bar,.brk-bar i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .printdate{display:block;text-align:center;color:var(--muted);font-size:12px;margin:6px 0 0}
+    .brk{break-inside:avoid}
   }
 </style>
 </head>
@@ -286,7 +348,7 @@
       <div id="wizardBody">
         <div class="wizhead">
           <sl-progress-bar id="prog" value="0"></sl-progress-bar>
-          <span class="step-label" id="stepLabel"></span>
+          <h2 class="step-label" id="stepLabel" tabindex="-1"></h2>
         </div>
         <div id="statements"></div>
         <div class="nav">
@@ -294,6 +356,7 @@
           <span class="spacer"></span>
           <sl-button id="nextBtn" variant="primary"></sl-button>
         </div>
+        <p class="navnote" id="navNote" role="status" aria-live="polite"></p>
         <div class="nav-restart">
           <sl-button id="restartBtn" variant="text" size="small"></sl-button>
         </div>
@@ -304,6 +367,7 @@
         <div class="results-head">
           <p class="eyebrow" id="resultsEyebrow"></p>
           <h2 id="resultsTitle"></h2>
+          <p class="printdate" id="printDate"></p>
         </div>
         <div class="breakdown" id="breakdown"></div>
         <div class="actions">
@@ -325,34 +389,19 @@ const LOCALES = {
   en:{
     label:"English", dir:"ltr", script:"latin", numLocale:"en-US",
     ui:{
-      countOf:"<b>{n}</b> of {total}",
       heroEyebrow:"Inspirational Leadership",
       heroTitle:"How do you lead?",
       heroLede:"A self-assessment across the six dimensions of leaders who inspire.",
       legend:'Rate yourself <b>1 to 5</b> on each statement, answering honestly about how you lead today rather than how you hope to. A <b>5</b> means you strongly agree, a <b>3</b> is neutral, and a <b>1</b> means you strongly disagree.',
       scaleKey:["Strongly disagree","Disagree","Neutral","Agree","Strongly agree"],
       begin:"Begin the assessment",
-      dimScore:"Dimension score",
       reveal:"Reveal my leadership profile",
-      lockedAll:"Answer all {total} statements to see your profile.",
       remaining:{one:"{n} statement left.",other:"{n} statements left."},
-      goNext:"Go to the next unanswered",
-      ready:"All set. See how your six dimensions come together.",
       resultsEyebrow:"Your profile",
       resultsTitle:"Six dimensions of inspirational leadership",
-      tags:{strength:"Signature strength",solid:"Solid",developing:"Developing",growth:"Growth area"},
-      strongest:"Strongest dimension",
-      growthOpp:"Biggest growth opportunity",
-      overall:"Overall",
-      bands:{
-        hi:"Your responses point to <b>deeply inspirational</b> tendencies across the board. The work now is consistency: keep your lowest dimension as honest as your highest.",
-        mid:"You have a <b>strong inspirational foundation</b>. Sharpening your one or two lowest dimensions will likely have the biggest effect on the people you lead.",
-        low:"Your leadership is <b>emerging</b>. Rather than improve everywhere at once, choose a single dimension below and make it deliberate for the next quarter.",
-        base:"You are <b>early in the journey</b>, which is the best time to be intentional. Pick the one dimension that matters most for your current role and start there."
-      },
       print:"Print or save as PDF",
       reset:"Start over",
-      footer1:'<b>Inspirational Leadership Self-Assessment.</b> A reflective tool for leaders who want to grow. Scores describe tendencies, not verdicts, and the most useful number is often your lowest one.',
+      footer1:'<b>Inspirational Leadership Self-Assessment.</b> A reflective tool for leaders who want to grow. Scores describe tendencies, not verdicts, and the pattern across the six matters more than any single number.',
       footer2:"Provided by Global Leadership Partners, a non-profit equipping leaders of character to make a positive difference. Replace this line and the mark above with the official logo and footer when you publish.",
       langLabel:"Language"
     },
@@ -399,34 +448,19 @@ const LOCALES = {
   es:{
     label:"Español", dir:"ltr", script:"latin", numLocale:"es-ES",
     ui:{
-      countOf:"<b>{n}</b> de {total}",
       heroEyebrow:"Liderazgo que inspira",
       heroTitle:"¿Cómo lideras?",
       heroLede:"Una autoevaluación en las seis dimensiones de los líderes que inspiran.",
       legend:'Puntúate del <b>1 al 5</b> en cada afirmación, respondiendo con honestidad sobre cómo lideras hoy y no sobre cómo te gustaría liderar. Un <b>5</b> significa que estás muy de acuerdo, un <b>3</b> es neutral y un <b>1</b> significa que estás muy en desacuerdo.',
       scaleKey:["Muy en desacuerdo","En desacuerdo","Neutral","De acuerdo","Muy de acuerdo"],
       begin:"Comenzar la autoevaluación",
-      dimScore:"Puntuación de la dimensión",
       reveal:"Ver mi perfil de liderazgo",
-      lockedAll:"Responde las {total} afirmaciones para ver tu perfil.",
       remaining:{one:"Queda {n} afirmación.",other:"Quedan {n} afirmaciones."},
-      goNext:"Ir a la siguiente sin responder",
-      ready:"Listo. Observa cómo se integran tus seis dimensiones.",
       resultsEyebrow:"Tu perfil",
       resultsTitle:"Seis dimensiones del liderazgo que inspira",
-      tags:{strength:"Fortaleza distintiva",solid:"Sólida",developing:"En desarrollo",growth:"Área de mejora"},
-      strongest:"Dimensión más fuerte",
-      growthOpp:"Mayor área de mejora",
-      overall:"Total",
-      bands:{
-        hi:"Tus respuestas reflejan una marcada <b>capacidad de inspirar</b> en todas las dimensiones. El reto ahora es la constancia: mantén tu dimensión más baja tan honesta como la más alta.",
-        mid:"Tienes una <b>base sólida para inspirar</b>. Reforzar una o dos de tus dimensiones más bajas será, probablemente, lo que más impacto tenga en quienes lideras.",
-        low:"Tu liderazgo está <b>en desarrollo</b>. En lugar de mejorar en todo a la vez, elige una sola dimensión de abajo y trabájala de forma deliberada durante el próximo trimestre.",
-        base:"Estás <b>al comienzo del camino</b>, que es el mejor momento para ser intencional. Elige la dimensión más importante para tu rol actual y empieza por ahí."
-      },
       print:"Imprimir o guardar como PDF",
       reset:"Empezar de nuevo",
-      footer1:'<b>Autoevaluación de Liderazgo que Inspira.</b> Una herramienta de reflexión para líderes que quieren crecer. Las puntuaciones describen tendencias, no veredictos, y el número más útil suele ser el más bajo.',
+      footer1:'<b>Autoevaluación de Liderazgo que Inspira.</b> Una herramienta de reflexión para líderes que quieren crecer. Las puntuaciones describen tendencias, no veredictos, y el conjunto de las seis dice más que cualquier número aislado.',
       footer2:"Ofrecida por Global Leadership Partners, una organización sin ánimo de lucro que forma líderes de carácter para marcar una diferencia positiva. Sustituye esta línea y el logotipo de arriba por los oficiales al publicar.",
       langLabel:"Idioma"
     },
@@ -473,16 +507,13 @@ const LOCALES = {
   ar:{
     label:"العربية", dir:"rtl", script:"arabic", numLocale:"ar", numbering:"latn",
     ui:{
-      countOf:"<b>{n}</b> من {total}",
       heroEyebrow:"القيادة المُلهِمة",
       heroTitle:"كيف تقود؟",
       heroLede:"تقييم ذاتي عبر الأبعاد الستة للقادة المُلهِمين.",
       legend:'قيّم نفسك من <b>1 إلى 5</b> في كل عبارة، مجيبًا بصدق عن أسلوبك في القيادة اليوم لا عمّا تتمنّاه. الدرجة <b>5</b> تعني أنك موافق بشدة، و<b>3</b> محايد، و<b>1</b> تعني أنك غير موافق بشدة.',
       scaleKey:["غير موافق بشدة","غير موافق","محايد","موافق","موافق بشدة"],
       begin:"ابدأ التقييم",
-      dimScore:"درجة البُعد",
       reveal:"أظهِر ملف قيادتي",
-      lockedAll:"أجب عن العبارات الـ {total} لرؤية ملفك.",
       remaining:{
         zero:"لم تتبقَّ عبارات.",
         one:"تبقّت عبارة واحدة.",
@@ -491,23 +522,11 @@ const LOCALES = {
         many:"تبقّت {n} عبارةً.",
         other:"تبقّت {n} عبارة."
       },
-      goNext:"انتقل إلى العبارة التالية غير المُجابة",
-      ready:"اكتمل التقييم. شاهد كيف تتكامل أبعادك الستة.",
       resultsEyebrow:"ملفك",
       resultsTitle:"الأبعاد الستة للقيادة المُلهِمة",
-      tags:{strength:"قوة مميِّزة",solid:"متينة",developing:"قيد التطوّر",growth:"مجال للتحسين"},
-      strongest:"أقوى بُعد",
-      growthOpp:"أكبر مجال للتحسين",
-      overall:"الإجمالي",
-      bands:{
-        hi:"تشير إجاباتك إلى ميلٍ راسخ نحو <b>القيادة المُلهِمة</b> في جميع الأبعاد. المهمة الآن هي الاتساق: اجعل أضعف أبعادك صادقًا كأقواها.",
-        mid:"لديك <b>أساس متين للإلهام</b>. غالبًا ما يكون تحسين بُعدٍ أو بُعدين من أدنى أبعادك هو الأكثر تأثيرًا في من تقودهم.",
-        low:"قيادتك <b>قيد النمو</b>. بدل التحسّن في كل شيء دفعة واحدة، اختر بُعدًا واحدًا أدناه واعمل عليه بقصدٍ خلال الربع المقبل.",
-        base:"أنت <b>في بداية الطريق</b>، وهو أفضل وقتٍ للعمل بقصد. اختر البُعد الأهم لدورك الحالي وابدأ منه."
-      },
       print:"اطبع أو احفظ بصيغة PDF",
       reset:"ابدأ من جديد",
-      footer1:'<b>تقييم ذاتي للقيادة المُلهِمة.</b> أداة تأمّلية للقادة الراغبين في النمو. تصف الدرجات ميولًا لا أحكامًا، وغالبًا ما يكون الرقم الأكثر فائدة هو الأدنى.',
+      footer1:'<b>تقييم ذاتي للقيادة المُلهِمة.</b> أداة تأمّلية للقادة الراغبين في النمو. تصف الدرجات ميولًا لا أحكامًا، والنمط عبر الأبعاد الستة أهم من أي رقم منفرد.',
       footer2:"مقدَّم من Global Leadership Partners، وهي منظمة غير ربحية تُعِدّ قادةً ذوي أخلاق لإحداث فرقٍ إيجابي. استبدل هذا السطر والشعار أعلاه بالنسخ الرسمية عند النشر.",
       langLabel:"اللغة"
     },
@@ -555,16 +574,16 @@ const LOCALES = {
 
 /* ---- strings added for the wizard flow (merged over the locale UI) ---- */
 const EXTRA = {
-  en:{stepOf:"Dimension {n} of {total}", partOf:"Part {n} of {total}", back:"Back", next:"Continue", intro_back:"Start over", relStrength:"Relative strength", growthLabel:"Growth opportunity", langChoose:"Choose your language"},
-  es:{stepOf:"Dimensión {n} de {total}", partOf:"Parte {n} de {total}", back:"Atrás", next:"Continuar", intro_back:"Empezar de nuevo", relStrength:"Fortaleza relativa", growthLabel:"Oportunidad de crecimiento", langChoose:"Elige tu idioma"},
-  ar:{stepOf:"البُعد {n} من {total}", partOf:"الجزء {n} من {total}", back:"رجوع", next:"متابعة", intro_back:"البدء من جديد", relStrength:"قوة نسبية", growthLabel:"فرصة للتطوّر", langChoose:"اختر لغتك"}
+  en:{partOf:"Part {n} of {total}", back:"Back", next:"Continue", relStrength:"Relative strength", growthLabel:"Growth opportunity", langChoose:"Choose your language"},
+  es:{partOf:"Parte {n} de {total}", back:"Atrás", next:"Continuar", relStrength:"Fortaleza relativa", growthLabel:"Oportunidad de crecimiento", langChoose:"Elige tu idioma"},
+  ar:{partOf:"الجزء {n} من {total}", back:"رجوع", next:"متابعة", relStrength:"قوة نسبية", growthLabel:"فرصة للتطوّر", langChoose:"اختر لغتك"}
 };
 for(const c in EXTRA){ if(LOCALES[c]&&LOCALES[c].ui) Object.assign(LOCALES[c].ui, EXTRA[c]); }
 
 /* ================================================================
    ENGINE
    ================================================================ */
-const FALLBACK="en", TOTAL=30, DIMS=6, PER=5, MAXITEM=5, MAXDIM=PER*MAXITEM, MAXTOTAL=DIMS*MAXDIM;
+const FALLBACK="en", TOTAL=30, DIMS=6, PER=5, MAXITEM=5, MAXDIM=PER*MAXITEM, MINDIM=PER;
 let activeCode="en";
 
 const numFmt={}, plurals={};
@@ -700,6 +719,7 @@ function startWizard(){
   phase="wizard"; buildPages(); pageIx=0;
   $("wizardBody").style.display=""; $("resultsBody").style.display="none";
   showScreen("stage"); renderPage(); scrollStage();
+  $("stepLabel").focus({preventScroll:true});
 }
 function renderPage(){
   const key=ui("scaleKey"), page=pages[pageIx];
@@ -708,32 +728,63 @@ function renderPage(){
   let html="";
   page.forEach((it,i)=>{
     const text=dims()[it.d].items[it.q], v=answers[it.d][it.q];
-    html+='<div class="q">'+
-      '<sl-radio-group class="scalegrp" data-d="'+it.d+'" data-q="'+it.q+'"'+(v!==null?' value="'+v+'"':'')+'>'+
-        '<span slot="label" class="q-text"><span class="q-n">'+nf(i+1)+'.</span>'+esc(text)+'</span>';
-    for(let val=1;val<=5;val++){ html+='<sl-radio-button value="'+val+'">'+nf(val)+'</sl-radio-button>'; }
-    html+='</sl-radio-group>'+
-      '<div class="scale-ends"><span>'+esc(key[0])+'</span><span class="mid">'+esc(key[2])+'</span><span>'+esc(key[4])+'</span></div>'+
+    const label='<span class="q-n">'+nf(i+1)+'.</span>'+esc(text);
+    const data=' data-d="'+it.d+'" data-q="'+it.q+'"';
+    if(slLoaded()){
+      html+='<div class="q">'+
+        '<sl-radio-group class="scalegrp"'+data+(v!==null?' value="'+v+'"':'')+'>'+
+          '<span slot="label" class="q-text">'+label+'</span>';
+      // The visible face of each option is a bare numeral; the anchor rides along in the
+      // accessible name so the scale isn't just "1, 2, 3, 4, 5" to a screen reader.
+      for(let val=1;val<=5;val++){
+        html+='<sl-radio-button value="'+val+'">'+nf(val)+
+              '<span class="sr-only"> — '+esc(key[val-1])+'</span></sl-radio-button>';
+      }
+      html+='</sl-radio-group>';
+    }else{
+      const name="q"+it.d+"_"+it.q;
+      html+='<div class="q">'+
+        '<fieldset class="scalegrp"'+data+'>'+
+          '<legend class="q-text">'+label+'</legend>'+
+          '<div class="nativescale">';
+      for(let val=1;val<=5;val++){
+        html+='<label class="nb"><input type="radio" name="'+name+'" value="'+val+'"'+
+              (v===val?' checked':'')+' aria-label="'+esc(nf(val)+" — "+key[val-1])+'">'+
+              '<span>'+nf(val)+'</span></label>';
+      }
+      html+='</div></fieldset>';
+    }
+    html+='<div class="scale-ends" aria-hidden="true"><span>'+esc(key[0])+'</span>'+
+          '<span class="mid">'+esc(key[2])+'</span><span>'+esc(key[4])+'</span></div>'+
     '</div>';
   });
   $("statements").innerHTML=html;
   $("statements").querySelectorAll(".scalegrp").forEach(g=>{
-    g.addEventListener("sl-change",()=>{
-      answers[Number(g.dataset.d)][Number(g.dataset.q)]=Number(g.value);
-      updateNav();
-    });
+    const record=(val)=>{ answers[Number(g.dataset.d)][Number(g.dataset.q)]=Number(val); updateNav(); };
+    g.addEventListener("sl-change",()=>record(g.value));
+    g.addEventListener("change",e=>{ if(e.target.matches('input[type="radio"]')) record(e.target.value); });
   });
   updateNav();
 }
 function updateNav(){
-  $("prog").value=Math.round(answeredCount()/TOTAL*100);
+  const prog=$("prog");
+  if(prog) prog.value=Math.round(answeredCount()/TOTAL*100);
   const back=$("backBtn"), next=$("nextBtn");
   back.innerHTML=ARROW.back+esc(ui("back"));
   const last=pageIx===PAGE_COUNT-1;
   next.innerHTML=esc(last?ui("reveal"):ui("next"))+(last?ARROW.down:ARROW.fwd);
-  next.toggleAttribute("disabled", !pageComplete(pageIx));
+  const done=pageComplete(pageIx);
+  next.toggleAttribute("disabled", !done);
+  // A disabled button explains nothing, and isn't focusable, so assistive tech never learns
+  // why it can't continue. Say what is outstanding instead.
+  const left=pages[pageIx].filter(it=>answers[it.d][it.q]===null).length;
+  setText("navNote", done ? "" : fmt(ui("remaining."+plurals[activeCode].select(left)) ?? ui("remaining.other"), {n:nf(left)}));
 }
-function goPage(i){ pageIx=Math.max(0,Math.min(PAGE_COUNT-1,i)); renderPage(); scrollStage(); }
+function goPage(i){
+  pageIx=Math.max(0,Math.min(PAGE_COUNT-1,i));
+  renderPage(); scrollStage();
+  $("stepLabel").focus({preventScroll:true});
+}
 function onBack(){ if(pageIx===0){ goIntro(); } else { goPage(pageIx-1); } }
 function onNext(){ if(pageIx===PAGE_COUNT-1){ gotoResults(); } else { goPage(pageIx+1); } }
 function restart(){ answers.forEach(a=>a.fill(null)); goIntro(); }
@@ -753,20 +804,45 @@ function renderResultsStatic(){
   setText("resultsEyebrow", ui("resultsEyebrow"));
   setText("resultsTitle",   ui("resultsTitle"));
   $("printBtn").innerHTML=esc(ui("print"));
+  // Print-only, so a sheet someone carries out of a workshop isn't undated. Intl supplies
+  // the wording, so this costs no new translation.
+  const dOpts={year:"numeric",month:"long",day:"numeric"};
+  if(L().numbering) dOpts.numberingSystem=L().numbering;
+  setText("printDate", new Date().toLocaleDateString(L().numLocale||activeCode, dOpts));
   renderBreakdown();
 }
 function renderBreakdown(){
-  // sorted high -> low; top two = relative strength, next two = growth opportunity, last two = no label
+  // Sorted high -> low: top two are relative strengths, the next two growth opportunities,
+  // and the bottom two are deliberately left unlabelled.
+  //
+  // Tags key off the score VALUE, not the rank. Six sums drawn from 5..25 tie constantly, and
+  // ranking alone would split tied dimensions by declaration order — telling one leader that
+  // Dream Big is a strength and Show Care a growth area purely because of the order the
+  // dimensions happen to be listed in. So a tie at the top widens the strength group, and a tie
+  // reaching the lowest score drops the growth tag rather than labelling a dimension this design
+  // means to leave silent.
   const order=dims().map((_,di)=>di).sort((a,b)=>dimScore(b)-dimScore(a));
+  const ranked=order.map(dimScore);
+  const strengthCut=ranked[1], growthCut=ranked[3], lowest=ranked[DIMS-1];
+  const level=ranked.filter(s=>s>=strengthCut).length>=DIMS-1;   // nothing meaningfully on top
+  const tagStrength=' <sl-tag class="tag s-strength" size="small" pill>'+esc(ui("relStrength"))+'</sl-tag>';
+  const tagGrowth  =' <sl-tag class="tag s-growth"   size="small" pill>'+esc(ui("growthLabel"))+'</sl-tag>';
   let html="";
-  order.forEach((di,rank)=>{
+  order.forEach(di=>{
     const dim=dims()[di], sc=dimScore(di);
     let tag="";
-    if(rank<2)      tag=' <sl-tag class="tag s-strength" size="small" pill>'+esc(ui("relStrength"))+'</sl-tag>';
-    else if(rank<4) tag=' <sl-tag class="tag s-growth" size="small" pill>'+esc(ui("growthLabel"))+'</sl-tag>';
+    if(!level){
+      if(sc>=strengthCut)                 tag=tagStrength;
+      else if(sc>=growthCut && sc>lowest) tag=tagGrowth;
+    }
+    // A dimension scores 5..25, never 0..25, so scale the bar to the achievable range —
+    // otherwise answering 1 to everything still draws six bars a fifth full. The fraction
+    // beside it stays the raw score, which is what carries across sessions.
+    const pct=(sc-MINDIM)/(MAXDIM-MINDIM)*100;
     html+='<div class="brk"><div class="brk-main">'+
       '<div class="brk-name">'+esc(dim.title)+tag+'</div>'+
-      '<div class="brk-bar"><i data-w="'+(sc/MAXDIM*100)+'"></i></div>'+
+      (dim.desc?'<div class="brk-desc">'+esc(dim.desc)+'</div>':'')+
+      '<div class="brk-bar"><i data-w="'+pct+'"></i></div>'+
       '</div><div class="brk-val">'+frac(sc,MAXDIM)+'</div></div>';
   });
   $("breakdown").innerHTML=html;
@@ -781,6 +857,9 @@ function applyLocale(code){
   const loc=L(), y=scrollY;
   document.documentElement.lang=code;
   document.documentElement.dir=loc.dir;
+  // Built from copy that is already translated — the tab, and the header of any printed
+  // PDF, otherwise stayed English no matter which language was chosen.
+  document.title=ui("heroEyebrow")+" — Global Leadership Partners";
   document.body.dataset.script=loc.script||"latin";
   const sel=$("lang");
   if(sel){
@@ -805,6 +884,20 @@ function detectInitial(){
   for(const n of navs){ const b=n.toLowerCase().split("-")[0]; if(LOCALES[b]) return b; }
   return "en";
 }
+
+/* Shoelace loads from a CDN, and `:not(:defined){visibility:hidden}` means a failed load
+   would otherwise leave a page of invisible buttons with nothing to click and no error.
+   Fall back to native controls instead: the rating scale becomes real radio inputs, and the
+   buttons stay clickable because their handlers are bound to the elements themselves. */
+function slLoaded(){ return !!customElements.get("sl-radio-group"); }
+function enterFallback(){
+  const root=document.documentElement;
+  if(root.classList.contains("sl-fallback")||slLoaded()) return;
+  root.classList.add("sl-fallback");
+  if(phase==="wizard") renderPage();
+}
+addEventListener("sl-failed", enterFallback);
+setTimeout(enterFallback, 5000);   // covers a hung request, which never rejects
 
 buildLangPicker();
 buildLangButtons();
