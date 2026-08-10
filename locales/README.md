@@ -91,6 +91,14 @@ Open `index.json` and add the code:
 
 Reload the assessment. The language appears in the picker.
 
+**Match the capitals exactly.** The file name and the code in this list must agree letter for
+letter — `pt-BR.json` with `"pt-BR"`, not `pt-br.json`. Web servers care about capitals even
+though Windows and macOS do not, so a mismatch can work on your own machine and fail once it is
+published.
+
+Do not start a language file's name with an underscore. Some hosting, GitHub Pages included,
+treats `_name.json` as a private file and will not publish it.
+
 ---
 
 ## If something goes wrong
