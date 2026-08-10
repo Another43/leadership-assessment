@@ -58,10 +58,6 @@
   li.warn  .badge{background:var(--warn);color:#fff}
   code,.where{font-family:var(--mono);font-size:12.5px;color:var(--navy);word-break:break-all}
   .where{font-weight:600}
-  table{border-collapse:collapse;width:100%;font-size:14px;margin-top:4px}
-  th,td{text-align:start;padding:8px 10px;border-bottom:1px solid var(--line-soft);vertical-align:top}
-  th{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
-  td.k{font-family:var(--mono);font-size:12.5px;color:var(--royal);white-space:nowrap}
   .note{font-size:13.5px;color:var(--muted);margin-top:10px}
   @media (max-width:640px){
     ul.findings li{grid-template-columns:1fr;gap:4px}
@@ -90,7 +86,7 @@
         <input type="text" id="code" value="de" spellcheck="false" autocomplete="off">
       </div>
       <div style="flex:0 0 auto">
-        <button type="button" id="plansBtn">Show what this language needs</button>
+        <button type="button" id="plansBtn">Check this code</button>
       </div>
     </div>
     <div id="plans"></div>
@@ -121,33 +117,39 @@ if(!S){
   $("out").innerHTML='<div class="verdict no">locale-schema.js did not load, so nothing can be checked. It must sit beside this page.</div>';
 }
 
-/* ---- what does this language need? ---- */
-function showPlans(){
+/* ---- confirm the code before anyone translates 68 lines against the wrong one ---- */
+function showCode(){
   const code=$("code").value.trim()||"en";
   let valid=true;
   try{ new Intl.NumberFormat(code); }catch(e){ valid=false; }
   if(!valid){
-    $("plans").innerHTML='<div class="verdict no">“'+esc(code)+'” is not a language code this browser recognises. '+
-      'Use a standard code such as <code>de</code>, <code>fr</code>, <code>pt-BR</code> or <code>zh-Hant</code>.</div>';
+    $("plans").innerHTML='<div class="verdict no">“'+esc(code)+'” is not a valid language code. '+
+      'Use letters and hyphens, never underscores — <code>de</code>, <code>fr</code>, '+
+      '<code>pt-BR</code>, <code>zh-Hant</code>.</div>';
     return;
   }
-  const need=S.requiredPlurals(code);
-  const cats=Object.keys(need);
-  const name=(()=>{ try{ return new Intl.DisplayNames([navigator.language||"en"],{type:"language"}).of(code); }catch(e){ return code; } })();
-  let rows="";
-  for(const cat of cats){
-    rows+='<tr><td class="k">'+esc(cat)+'</td><td>used when the number is '+need[cat].join(", ")+
-          '</td><td>'+(need[cat].length>1?'must contain <code>{n}</code>':'the number can be written into the words')+'</td></tr>';
+  // Well-formed is not the same as real: "klingon" parses but no browser has data for it.
+  if(!Intl.NumberFormat.supportedLocalesOf([code]).length){
+    $("plans").innerHTML='<div class="verdict no">“'+esc(code)+'” looks like a code, but this browser has no '+
+      'language data for it, which usually means it is a typo or a language name rather than a code. '+
+      'Use the standard short code — <code>de</code> for German, <code>sw</code> for Swahili, '+
+      '<code>pt-BR</code> for Brazilian Portuguese. If the code really is right, the assessment will still '+
+      'work; only the date on a printout falls back to a default format.</div>';
+    return;
   }
+  const name=(()=>{ try{ return new Intl.DisplayNames([navigator.language||"en"],{type:"language"}).of(code); }catch(e){ return code; } })();
+  const rtl=(()=>{
+    try{ if(new Intl.Locale(code).getTextInfo) return new Intl.Locale(code).getTextInfo().direction==="rtl"; }catch(e){}
+    return /^(ar|he|fa|ur|ps|sd|ug|yi|dv|ku)\b/.test(code);
+  })();
   $("plans").innerHTML=
-    '<p class="note"><b>'+esc(name)+'</b> ('+esc(code)+') is written '+
-      (new Intl.Locale(code).getTextInfo?.().direction==="rtl"||/^(ar|he|fa|ur|ps|sd|ug|yi)\b/.test(code)?
-        'right-to-left, so set <code>"dir": "rtl"</code>.':'left-to-right, so set <code>"dir": "ltr"</code>.')+'</p>'+
-    '<p class="note">The only number this tool ever shows is how many statements are left on a page, 1 to 5. '+
-      'For '+esc(name)+' that needs <b>'+cats.length+'</b> plural form'+(cats.length===1?'':'s')+' in <code>ui.remaining</code>:</p>'+
-    '<table><thead><tr><th>form</th><th>when</th><th>note</th></tr></thead><tbody>'+rows+'</tbody></table>'+
-    '<p class="note">A full grammar reference for this language may list more plural forms than this. '+
-      'Because the number here is only ever 1 to 5, the forms above are the only ones you need.</p>';
+    '<p class="note">Recognised as <b>'+esc(name)+'</b>. Save the file as <code>'+esc(code)+'.json</code> '+
+      'and set <code>"numLocale": "'+esc(code)+'"</code> inside it.</p>'+
+    '<p class="note">'+esc(name)+' is written '+
+      (rtl?'right-to-left, so set <code>"dir": "rtl"</code> — the whole layout mirrors on its own.'
+         :'left-to-right, so set <code>"dir": "ltr"</code>.')+'</p>'+
+    '<p class="note">Every value in the file is plain text. There are no tags to keep and no '+
+      'special forms to fill in — translate the words and leave anything in <code>{curly braces}</code> alone.</p>';
 }
 
 /* ---- run the check ---- */
@@ -213,14 +215,10 @@ async function downloadTemplate(){
     $("out").innerHTML='<div class="verdict no">Could not build a starter file: '+esc(e.message)+'</div>';
     return;
   }
-  const need=S.requiredPlurals(code);
   const tpl=JSON.parse(JSON.stringify(base));
   tpl.label="";                       // must be written in the new language
   tpl.numLocale=code;
   delete tpl.font;                    // only needed for a different script
-  const remaining={};
-  for(const cat of Object.keys(need)) remaining[cat]=base.ui.remaining[cat]||base.ui.remaining.other||"{n} left.";
-  tpl.ui.remaining=remaining;
 
   const blob=new Blob([JSON.stringify(tpl,null,2)+"\n"],{type:"application/json"});
   const a=document.createElement("a");
@@ -232,11 +230,11 @@ async function downloadTemplate(){
     'as written in that language, then come back and check it.</div>';
 }
 
-$("plansBtn").addEventListener("click", showPlans);
+$("plansBtn").addEventListener("click", showCode);
 $("checkBtn").addEventListener("click", runCheck);
 $("loadBtn").addEventListener("click", loadPublished);
 $("tplBtn").addEventListener("click", downloadTemplate);
-showPlans();
+showCode();
 </script>
 </body>
 </html>

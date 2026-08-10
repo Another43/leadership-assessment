@@ -16,10 +16,6 @@
     ],
     "begin": "Begin the assessment",
     "reveal": "Reveal my leadership profile",
-    "remaining": {
-      "one": "{n} statement left.",
-      "other": "{n} statements left."
-    },
     "resultsEyebrow": "Your profile",
     "resultsTitle": "Six dimensions of inspirational leadership",
     "print": "Print or save as PDF",

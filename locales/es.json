@@ -16,10 +16,6 @@
     ],
     "begin": "Comenzar la autoevaluación",
     "reveal": "Ver mi perfil de liderazgo",
-    "remaining": {
-      "one": "Queda {n} afirmación.",
-      "other": "Quedan {n} afirmaciones."
-    },
     "resultsEyebrow": "Tu perfil",
     "resultsTitle": "Seis dimensiones del liderazgo que inspira",
     "print": "Imprimir o guardar como PDF",

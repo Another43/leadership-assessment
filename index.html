@@ -228,7 +228,6 @@
      isn't in the tab order, so nothing is lost visually, and Chrome matches :focus-visible on
      programmatic focus even after a mouse click — which just looked like a stray box. */
   .step-label:focus,.step-label:focus-visible{outline:none}
-  .navnote{text-align:center;font-size:13px;color:var(--muted);margin:12px 0 0;min-height:1.2em}
 
   .q{padding:22px 0;border-bottom:1px solid var(--line-soft)}
   .q:last-of-type{border-bottom:0}
@@ -390,7 +389,6 @@
           <span class="spacer"></span>
           <sl-button id="nextBtn" variant="primary"></sl-button>
         </div>
-        <p class="navnote" id="navNote" role="status" aria-live="polite"></p>
         <div class="nav-restart">
           <sl-button id="restartBtn" variant="text" size="small"></sl-button>
         </div>
@@ -436,12 +434,11 @@ let FALLBACK="en";
 const TOTAL=30, DIMS=6, PER=5, MAXITEM=5, MAXDIM=PER*MAXITEM, MINDIM=PER;
 let activeCode="en";
 
-const numFmt={}, plurals={};
+const numFmt={};
 function registerLocale(code,loc){
   LOCALES[code]=loc;
   const opts=loc.numbering?{numberingSystem:loc.numbering}:{};
   numFmt[code]=new Intl.NumberFormat(loc.numLocale||code,opts);
-  plurals[code]=new Intl.PluralRules(loc.numLocale||code);
 }
 const L =()=>LOCALES[activeCode];
 const nf=(n)=>numFmt[activeCode].format(n);
@@ -642,12 +639,7 @@ function updateNav(){
   back.innerHTML=ARROW.back+esc(ui("back"));
   const last=pageIx===PAGE_COUNT-1;
   next.innerHTML=esc(last?ui("reveal"):ui("next"))+(last?ARROW.down:ARROW.fwd);
-  const done=pageComplete(pageIx);
-  next.toggleAttribute("disabled", !done);
-  // A disabled button explains nothing, and isn't focusable, so assistive tech never learns
-  // why it can't continue. Say what is outstanding instead.
-  const left=pages[pageIx].filter(it=>answers[it.d][it.q]===null).length;
-  setText("navNote", done ? "" : fmt(ui("remaining."+plurals[activeCode].select(left)) ?? ui("remaining.other"), {n:nf(left)}));
+  next.toggleAttribute("disabled", !pageComplete(pageIx));
 }
 function goPage(i){
   pageIx=Math.max(0,Math.min(PAGE_COUNT-1,i));

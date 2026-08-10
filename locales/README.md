@@ -12,7 +12,7 @@ two steps: add a file, then name it in the list.
 
 Open **`check.html`** in a browser (it sits next to `index.html` on the server). That page:
 
-- tells you exactly what your language needs, including how many plural forms
+- confirms your language code and tells you whether it reads left-to-right or right-to-left
 - builds you a starter file with the English already in place
 - checks your finished file and explains any mistakes in plain English
 
@@ -53,16 +53,6 @@ Three rules that matter:
 3. **Every value is plain text.** There is no markup to preserve anywhere in these files. If a
    line appears bold or italic in the assessment, the page decides that — `footerTitle` is the
    name of the assessment and always renders bold, for instance. Just translate the words.
-
-### Plural forms
-
-`ui.remaining` is the "3 statements left" message. Languages count differently, so this is an
-object rather than one line. English needs two forms; Arabic needs three here; Polish needs
-three; Chinese needs one.
-
-**`check.html` tells you which forms your language needs and when each is used.** Fill in only
-those. Where a form covers more than one number it must contain `{n}`; where it covers a single
-number you can write the number into the words, as Arabic does with `عبارتان` for two.
 
 ### A different alphabet
 
