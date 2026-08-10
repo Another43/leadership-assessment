@@ -107,7 +107,6 @@
     background:var(--surface);color:var(--navy);padding:12px 22px;font-weight:600;font-size:15px;
   }
   .sl-fallback sl-button:not(:defined)[variant="primary"]{background:var(--royal);color:#fff;border-color:var(--royal)}
-  .sl-fallback sl-button:not(:defined)[disabled]{opacity:.45;cursor:not-allowed}
   .sl-fallback sl-button:not(:defined) svg{display:none}
   .sl-fallback .langpick,
   .sl-fallback sl-progress-bar:not(:defined){display:none}
@@ -229,7 +228,15 @@
      programmatic focus even after a mouse click — which just looked like a stray box. */
   .step-label:focus,.step-label:focus-visible{outline:none}
 
-  .q{padding:22px 0;border-bottom:1px solid var(--line-soft)}
+  /* Pressing Continue with something unanswered lands you here, so leave room for the sticky
+     brand bar and flash the statement. Colour only, no movement — the scroll itself is what
+     prefers-reduced-motion turns off, in goToUnanswered(). */
+  .q{padding:22px 0;border-bottom:1px solid var(--line-soft);scroll-margin-top:100px;border-radius:12px}
+  .q.needs-answer{animation:needsAnswer 1.8s ease-out}
+  @keyframes needsAnswer{
+    0%,55%{background:rgba(201,154,58,.10);box-shadow:0 0 0 12px rgba(201,154,58,.10)}
+    100%  {background:transparent;box-shadow:0 0 0 12px rgba(201,154,58,0)}
+  }
   .q:last-of-type{border-bottom:0}
   .q-text{display:block;font-size:16px;color:var(--ink);line-height:1.45;margin-bottom:2px}
   .q-text .q-n{color:var(--muted);font-variant-numeric:tabular-nums;font-weight:600;margin-inline-end:8px}
@@ -639,7 +646,6 @@ function updateNav(){
   back.innerHTML=ARROW.back+esc(ui("back"));
   const last=pageIx===PAGE_COUNT-1;
   next.innerHTML=esc(last?ui("reveal"):ui("next"))+(last?ARROW.down:ARROW.fwd);
-  next.toggleAttribute("disabled", !pageComplete(pageIx));
 }
 function goPage(i){
   pageIx=Math.max(0,Math.min(PAGE_COUNT-1,i));
@@ -647,7 +653,33 @@ function goPage(i){
   $("stepLabel").focus({preventScroll:true});
 }
 function onBack(){ if(pageIx===0){ goIntro(); } else { goPage(pageIx-1); } }
-function onNext(){ if(pageIx===PAGE_COUNT-1){ gotoResults(); } else { goPage(pageIx+1); } }
+
+/* Continue is never disabled. While anything on the page is unanswered it takes you to the
+   first one instead of advancing — a greyed-out button explains nothing and cannot be focused,
+   so assistive tech was never told why it was stuck. Landing focus on the group announces the
+   statement that still needs an answer, and the highlight makes it obvious to everyone else. */
+function goToUnanswered(i){
+  const q=$("statements").children[i];
+  if(!q) return;
+  const group=q.querySelector(".scalegrp");
+  const native=group.matches("fieldset");
+  const target=native ? group.querySelector("input") : group;
+  q.classList.remove("needs-answer");
+  void q.offsetWidth;                     // restart the highlight if it is already running
+  q.classList.add("needs-answer");
+  q.scrollIntoView({behavior:prefersReduced?"auto":"smooth", block:"center"});
+  if(!target||!target.focus) return;
+  // A Shoelace group forwards focus into a radio's shadow root, which does not exist until that
+  // component has rendered. Wait for it, or the focus call is a silent no-op.
+  const first=native ? null : group.querySelector("sl-radio-button");
+  const ready=(first&&first.updateComplete)||Promise.resolve();
+  ready.then(()=>target.focus({preventScroll:true}));
+}
+function onNext(){
+  const unanswered=pages[pageIx].findIndex(it=>answers[it.d][it.q]===null);
+  if(unanswered!==-1){ goToUnanswered(unanswered); return; }
+  if(pageIx===PAGE_COUNT-1){ gotoResults(); } else { goPage(pageIx+1); }
+}
 function restart(){ answers.forEach(a=>a.fill(null)); goIntro(); }
 
 /* ---------- results (bar graph, no overall box) ---------- */
